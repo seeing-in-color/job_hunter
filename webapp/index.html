@@ -291,6 +291,44 @@
   .titem textarea { margin-top:8px; min-height:48px; }
   .empty-s { color:var(--muted); font-size:13px; padding:6px 0; }
 
+  /* View switcher */
+  .viewseg { display:inline-flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; background:var(--surface); }
+  .viewseg button { appearance:none; border:0; background:none; font-family:inherit; font-size:12.5px; font-weight:550; color:var(--muted); padding:7px 12px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background .13s,color .13s; }
+  .viewseg button:not(:last-child){ border-right:1px solid var(--border); }
+  .viewseg button[aria-pressed="true"] { background:var(--ink); color:var(--paper); }
+  .viewseg button:hover:not([aria-pressed="true"]) { color:var(--ink); }
+  .viewseg .vico { width:14px; height:14px; }
+
+  /* Shared row-action buttons (table + excel) */
+  .rowacts { display:inline-flex; gap:5px; align-items:center; white-space:nowrap; }
+  .rowacts .btn { padding:3px 8px; font-size:11px; }
+  .rrole { font-weight:600; color:inherit; text-decoration:none; }
+  a.rrole:hover { color:var(--accent); }
+
+  /* Table view */
+  .tbl-wrap { overflow-x:auto; padding:16px 0 44px; }
+  table.rtable { width:100%; border-collapse:collapse; font-size:13px; }
+  .rtable th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:650; padding:9px 12px; border-bottom:1.5px solid var(--border-strong); white-space:nowrap; }
+  .rtable td { padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:middle; white-space:nowrap; }
+  .rtable tr:hover td { background:var(--surface-2); }
+  .rtable td.pay, .rtable .pay { font-variant-numeric:tabular-nums; font-weight:600; }
+  .rtable td.wrap { white-space:normal; min-width:180px; }
+  .rtable .stt { width:9px; height:9px; border-radius:50%; display:inline-block; background:var(--border-strong); }
+  .rtable .stt.fit { background:var(--good); } .rtable .stt.pass { background:var(--muted); }
+  .rtable .cat-tag { font-size:10px; }
+
+  /* Excel view */
+  .xl-wrap { overflow-x:auto; padding:16px 0 44px; }
+  table.xtable { border-collapse:collapse; font-size:12.5px; background:var(--surface); border:1px solid var(--border-strong); font-variant-numeric:tabular-nums; }
+  .xtable th, .xtable td { border:1px solid var(--border); padding:6px 10px; white-space:nowrap; text-align:left; }
+  .xtable thead .colhead th { background:var(--surface-2); color:var(--muted); font-weight:600; text-align:center; font-size:10.5px; letter-spacing:.03em; }
+  .xtable thead .namehead th { background:var(--surface-2); color:var(--ink-soft); font-weight:650; font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+  .xtable td.rownum, .xtable th.rownum { background:var(--surface-2); color:var(--muted); text-align:center; width:36px; font-size:11px; }
+  .xtable tbody tr:nth-child(even) td:not(.rownum) { background:color-mix(in srgb, var(--surface-2) 55%, transparent); }
+  .xtable tbody tr:hover td { background:var(--accent-soft); }
+  .xtable .pay { font-weight:600; }
+  .xtable .cat-tag { font-size:10px; }
+
   @media (prefers-reduced-motion: reduce) { *, .modal { animation: none !important; transition: none !important; } }
   .fade { animation: fade .4s ease both; }
   @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
@@ -443,7 +481,7 @@
   const CATS = { household:{label:'Household & Family', cls:'cat-household', color:'var(--household)'}, organizing:{label:'Professional Organizing', cls:'cat-organizing', color:'var(--organizing)'} };
   const CHECK_DATE = '2026-07-18';              // date the verified roles were confirmed live
   const ROLLING = new Set(['r8','r9','r10','r16','r17']); // agency / platform / rolling openings
-  const STORE='kc-role-status-v1', NSTORE='kc-role-notes-v1', PSTORE='kc-prefs-v1';
+  const STORE='kc-role-status-v1', NSTORE='kc-role-notes-v1', PSTORE='kc-prefs-v1', VSTORE='kc-view-v1';
   const load = (k,d)=>{ try { return JSON.parse(localStorage.getItem(k) || d); } catch(e){ return JSON.parse(d); } };
   let status = load(STORE,'{}');
   let notes = load(NSTORE,'{}');
@@ -452,10 +490,12 @@
     exclude: "Senior / elder home-care & caregiver agency roles. Commercial or HOA property management. Restaurant 'front of house' manager roles. Non-Austin roles (travel / live-in or San Antonio) unless flagged OK."
   };
   let prefs = Object.assign({}, DEFAULT_PREFS, load(PSTORE,'{}'));
+  let viewMode = localStorage.getItem(VSTORE) || 'tiles';   // 'tiles' | 'table' | 'excel'
   const save = () => { try {
     localStorage.setItem(STORE, JSON.stringify(status));
     localStorage.setItem(NSTORE, JSON.stringify(notes));
     localStorage.setItem(PSTORE, JSON.stringify(prefs));
+    localStorage.setItem(VSTORE, viewMode);
   } catch(e){} };
   const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 
@@ -511,9 +551,15 @@
     ].map(c=>`<button class="chip" data-filter="${c.key}" aria-pressed="${filter===c.key}">
         ${c.dot?`<span class="dot" style="background:${c.dot}"></span>`:''}${c.label}<span class="count">${counts[c.key]}</span>
       </button>`).join('');
+    const seg = `<div class="viewseg" id="viewseg" role="group" aria-label="View mode">
+      <button data-vm="tiles" aria-pressed="${viewMode==='tiles'}" title="Card tiles">▦ Tiles</button>
+      <button data-vm="table" aria-pressed="${viewMode==='table'}" title="Compact table">☰ Table</button>
+      <button data-vm="excel" aria-pressed="${viewMode==='excel'}" title="Spreadsheet grid">▤ Excel</button>
+    </div>`;
     document.getElementById('controls').innerHTML = chips +
-      `<span class="spacer"></span><input class="search" id="search" type="search" placeholder="Search roles…" value="${query.replace(/"/g,'&quot;')}" />`;
+      `<span class="spacer"></span>${seg}<input class="search" id="search" type="search" placeholder="Search roles…" value="${query.replace(/"/g,'&quot;')}" />`;
     document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ filter=b.dataset.filter; renderControls(); renderGrid(); });
+    document.querySelectorAll('#viewseg button').forEach(b=>b.onclick=()=>{ viewMode=b.dataset.vm; save(); renderControls(); renderGrid(); });
     const s = document.getElementById('search');
     s.oninput = (e)=>{ query = e.target.value; renderGrid(); };
   }
@@ -550,10 +596,79 @@
         <span class="src">${r.src}</span>
         ${linkBtn}
         <span class="foot-spacer"></span>
-        <button class="btn btn-fit" data-act="fit" aria-pressed="${st==='fit'}">✓ Right fit</button>
-        <button class="btn btn-pass" data-act="pass" aria-pressed="${st==='pass'}">Not for me</button>
+        <button class="btn btn-fit" data-id="${r.id}" data-act="fit" aria-pressed="${st==='fit'}">✓ Right fit</button>
+        <button class="btn btn-pass" data-id="${r.id}" data-act="pass" aria-pressed="${st==='pass'}">Not for me</button>
       </div>
     </article>`;
+  }
+
+  // Shared cell content for table + excel rows (Category … Tag)
+  function rowCells(r) {
+    const st = status[r.id], c = CATS[r.cat], fr = freshness(r);
+    const catShort = r.cat==='household' ? 'Household' : 'Organizing';
+    const roleCell = r.url
+      ? `<a href="${r.url}" target="_blank" rel="noopener" class="rrole">${esc(r.title)} ↗</a>`
+      : `<span class="rrole">${esc(r.title)}</span>`;
+    const noteMark = notes[r.id] ? ` <span title="${esc(notes[r.id])}" style="cursor:help">✏️</span>` : '';
+    const tag = `<span class="rowacts">
+        <button class="btn btn-fit" data-id="${r.id}" data-act="fit" aria-pressed="${st==='fit'}" title="Right fit">✓</button>
+        <button class="btn btn-pass" data-id="${r.id}" data-act="pass" aria-pressed="${st==='pass'}" title="Not for me">✕</button>${noteMark}</span>`;
+    return [
+      `<span class="cat-tag ${c.cls}">${catShort}</span>`,
+      roleCell,
+      esc(r.company),
+      esc(r.loc),
+      esc(r.schedule),
+      `<span class="pay">${esc(r.pay)}</span>`,
+      esc(fr.text),
+      esc(r.src),
+      tag
+    ];
+  }
+
+  function renderTable(list) {
+    const heads = ['','Category','Role','Company','Location','Schedule','Pay','Posted','Source','Tag'];
+    const body = list.map(r=>{
+      const st = status[r.id];
+      const cells = rowCells(r);
+      return `<tr>
+        <td><span class="stt ${st||''}" title="${st==='fit'?'Right fit':st==='pass'?'Not for me':'Untagged'}"></span></td>
+        <td>${cells[0]}</td><td class="wrap">${cells[1]}</td><td>${cells[2]}</td><td>${cells[3]}</td>
+        <td>${cells[4]}</td><td class="pay">${cells[5]}</td><td>${cells[6]}</td><td>${cells[7]}</td><td>${cells[8]}</td>
+      </tr>`;
+    }).join('');
+    return `<div class="tbl-wrap"><table class="rtable">
+      <thead><tr>${heads.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+      <tbody>${body}</tbody></table></div>`;
+  }
+
+  function renderExcel(list) {
+    const names = ['#','Category','Role','Company','Location','Schedule','Pay','Posted','Source','Tag'];
+    const letters = ['','A','B','C','D','E','F','G','H','I'];
+    const body = list.map((r,i)=>{
+      const cells = rowCells(r);
+      return `<tr><td class="rownum">${i+1}</td>${cells.map(c=>`<td>${c}</td>`).join('')}</tr>`;
+    }).join('');
+    return `<div class="xl-wrap"><table class="xtable">
+      <thead>
+        <tr class="colhead">${letters.map(l=>`<th class="${l===''?'rownum':''}">${l}</th>`).join('')}</tr>
+        <tr class="namehead">${names.map((n,i)=>`<th class="${i===0?'rownum':''}">${n}</th>`).join('')}</tr>
+      </thead>
+      <tbody>${body}</tbody></table></div>`;
+  }
+
+  function wireActions(host) {
+    host.querySelectorAll('.btn[data-act]').forEach(btn=>{
+      btn.onclick = ()=>{
+        const id = btn.dataset.id, act = btn.dataset.act;
+        if (status[id]===act) {              // click the active tag again to clear it + its note
+          delete status[id]; delete notes[id];
+          save(); renderGrid(); renderStats(); renderSettings();
+        } else {
+          openModal(id, act);                // ask for the "why" so it trains future searches
+        }
+      };
+    });
   }
 
   function renderGrid() {
@@ -561,22 +676,12 @@
     const list = ROLES.filter(r => (filter==='all' || (filter==='verified' ? r.verified : r.cat===filter)))
       .filter(r => !q || (r.title+' '+r.company+' '+r.loc+' '+r.src).toLowerCase().includes(q));
     const grid = document.getElementById('grid');
+    grid.className = viewMode==='tiles' ? 'grid' : '';
     if (!list.length) { grid.innerHTML = '<div class="empty">No roles match — try clearing the search or filter.</div>'; return; }
-    grid.innerHTML = list.map(card).join('');
-    grid.querySelectorAll('.card').forEach(el=>{
-      const id = el.dataset.id;
-      el.querySelectorAll('.btn[data-act]').forEach(btn=>{
-        btn.onclick = ()=>{
-          const act = btn.dataset.act;
-          if (status[id]===act) {            // click again to clear the tag + its note
-            delete status[id]; delete notes[id];
-            save(); renderGrid(); renderStats(); renderSettings();
-          } else {
-            openModal(id, act);              // ask for the "why" so it trains future searches
-          }
-        };
-      });
-    });
+    if (viewMode==='table')      grid.innerHTML = renderTable(list);
+    else if (viewMode==='excel') grid.innerHTML = renderExcel(list);
+    else                         grid.innerHTML = list.map(card).join('');
+    wireActions(grid);
   }
 
   function renderSources() {
