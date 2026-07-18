@@ -1,0 +1,22 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Node (for future tooling)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.env
+.env.*
+
+# Local build / temp
+dist/
+.cache/
+._check.js
+
+# Never commit application credentials
+secrets*
+*.secret

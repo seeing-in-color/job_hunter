@@ -1,0 +1,692 @@
+<meta charset="utf-8" />
+<title>Kingsley · Austin Role Finder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<style>
+  :root {
+    --paper: #F7F5F0;
+    --surface: #FFFFFF;
+    --surface-2: #FBFAF7;
+    --border: #E7E3DA;
+    --border-strong: #D8D3C7;
+    --ink: #20241F;
+    --ink-soft: #4B524A;
+    --muted: #838A81;
+    --accent: #2E6B57;
+    --accent-ink: #1E4A3C;
+    --accent-soft: #E1EDE7;
+    --household: #B0623F;
+    --household-soft: #F4E3D9;
+    --organizing: #2E6B57;
+    --organizing-soft: #E1EDE7;
+    --good: #2E7D57;
+    --good-soft: #DFF0E6;
+    --warn: #B0623F;
+    --warn-soft: #F6E6DD;
+    --shadow: 0 1px 2px rgba(32,36,31,.04), 0 8px 24px -12px rgba(32,36,31,.14);
+    --shadow-lift: 0 2px 4px rgba(32,36,31,.05), 0 18px 40px -16px rgba(32,36,31,.22);
+    --radius: 14px;
+    --radius-sm: 9px;
+    --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --maxw: 1120px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #141613;
+      --surface: #1C1F1B;
+      --surface-2: #21251F;
+      --border: #2E332C;
+      --border-strong: #3A4038;
+      --ink: #ECEBE3;
+      --ink-soft: #BAC0B6;
+      --muted: #868E82;
+      --accent: #79C0A5;
+      --accent-ink: #A6DCC8;
+      --accent-soft: #21362E;
+      --household: #DA8B66;
+      --household-soft: #33241C;
+      --organizing: #79C0A5;
+      --organizing-soft: #21362E;
+      --good: #6FBE92;
+      --good-soft: #1F3229;
+      --warn: #DA8B66;
+      --warn-soft: #33241C;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.6);
+      --shadow-lift: 0 2px 6px rgba(0,0,0,.35), 0 22px 46px -18px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="light"] {
+    --paper: #F7F5F0; --surface: #FFFFFF; --surface-2: #FBFAF7; --border: #E7E3DA;
+    --border-strong: #D8D3C7; --ink: #20241F; --ink-soft: #4B524A; --muted: #838A81;
+    --accent: #2E6B57; --accent-ink: #1E4A3C; --accent-soft: #E1EDE7;
+    --household: #B0623F; --household-soft: #F4E3D9; --organizing: #2E6B57; --organizing-soft: #E1EDE7;
+    --good: #2E7D57; --good-soft: #DFF0E6; --warn: #B0623F; --warn-soft: #F6E6DD;
+    --shadow: 0 1px 2px rgba(32,36,31,.04), 0 8px 24px -12px rgba(32,36,31,.14);
+    --shadow-lift: 0 2px 4px rgba(32,36,31,.05), 0 18px 40px -16px rgba(32,36,31,.22);
+  }
+  :root[data-theme="dark"] {
+    --paper: #141613; --surface: #1C1F1B; --surface-2: #21251F; --border: #2E332C;
+    --border-strong: #3A4038; --ink: #ECEBE3; --ink-soft: #BAC0B6; --muted: #868E82;
+    --accent: #79C0A5; --accent-ink: #A6DCC8; --accent-soft: #21362E;
+    --household: #DA8B66; --household-soft: #33241C; --organizing: #79C0A5; --organizing-soft: #21362E;
+    --good: #6FBE92; --good-soft: #1F3229; --warn: #DA8B66; --warn-soft: #33241C;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.6);
+    --shadow-lift: 0 2px 6px rgba(0,0,0,.35), 0 22px 46px -18px rgba(0,0,0,.7);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  a { color: inherit; }
+
+  /* Header */
+  header.top {
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--paper) 86%, transparent);
+    position: sticky; top: 0; z-index: 20;
+    backdrop-filter: blur(8px);
+  }
+  .top-inner { display: flex; align-items: center; gap: 14px; padding: 16px 24px; max-width: var(--maxw); margin: 0 auto; }
+  .mark {
+    width: 34px; height: 34px; border-radius: 9px; flex: none;
+    background: linear-gradient(150deg, var(--accent), color-mix(in srgb, var(--accent) 55%, #7bbfa6));
+    display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 15px;
+    box-shadow: var(--shadow);
+  }
+  :root[data-theme="dark"] .mark, @media (prefers-color-scheme: dark) { }
+  .brand h1 { font-size: 15px; margin: 0; letter-spacing: -.01em; font-weight: 650; }
+  .brand p { font-size: 12px; margin: 0; color: var(--muted); }
+  .top-spacer { flex: 1; }
+  .top-note {
+    font-size: 12px; color: var(--ink-soft); background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
+    padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+  }
+  @media (max-width: 720px) { .top-note { display: none; } }
+
+  /* Intro banner */
+  .intro { padding: 30px 0 12px; }
+  .eyebrow { font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 650; }
+  .intro h2 { font-size: clamp(22px, 3.2vw, 30px); margin: 8px 0 6px; letter-spacing: -.02em; text-wrap: balance; }
+  .intro p { max-width: 62ch; color: var(--ink-soft); margin: 0; font-size: 15px; }
+
+  /* Stat strip */
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 24px 0 6px; }
+  @media (max-width: 860px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 460px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+  .stat {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 15px 16px; box-shadow: var(--shadow);
+  }
+  .stat .k { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+  .stat .v { font-size: 25px; font-weight: 700; letter-spacing: -.02em; margin-top: 5px; font-variant-numeric: tabular-nums; }
+  .stat .v small { font-size: 13px; font-weight: 600; color: var(--ink-soft); letter-spacing: 0; }
+  .stat.accent .v { color: var(--accent); }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin: 26px 0 4px; border-bottom: 1px solid var(--border); }
+  .tab {
+    appearance: none; background: none; border: 0; cursor: pointer; font-family: inherit;
+    font-size: 14px; font-weight: 550; color: var(--muted); padding: 10px 14px;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+  .tab:hover { color: var(--ink); }
+
+  /* Controls */
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 18px 0 6px; }
+  .chip {
+    appearance: none; font-family: inherit; cursor: pointer;
+    background: var(--surface); border: 1px solid var(--border); color: var(--ink-soft);
+    padding: 7px 13px; border-radius: 999px; font-size: 13px; font-weight: 550;
+    display: inline-flex; align-items: center; gap: 7px; transition: border-color .15s, color .15s, background .15s;
+  }
+  .chip:hover { border-color: var(--border-strong); color: var(--ink); }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .chip .count { font-variant-numeric: tabular-nums; opacity: .6; font-weight: 600; }
+  .controls .spacer { flex: 1; }
+  .search {
+    font-family: inherit; font-size: 13px; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--border); border-radius: 999px; padding: 8px 14px; width: 210px;
+    transition: border-color .15s;
+  }
+  .search:focus { outline: none; border-color: var(--accent); }
+  .search::placeholder { color: var(--muted); }
+
+  /* Cards */
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; padding: 16px 0 40px; }
+  @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px 18px 15px; box-shadow: var(--shadow); position: relative;
+    display: flex; flex-direction: column; gap: 12px; transition: box-shadow .18s, transform .18s, border-color .18s;
+  }
+  .card:hover { box-shadow: var(--shadow-lift); transform: translateY(-2px); border-color: var(--border-strong); }
+  .card.done-fit { border-color: color-mix(in srgb, var(--good) 45%, var(--border)); }
+  .card.done-pass { opacity: .58; }
+  .card-head { display: flex; align-items: flex-start; gap: 10px; }
+  .cat-tag {
+    font-size: 11px; font-weight: 650; letter-spacing: .03em; padding: 4px 9px; border-radius: 7px;
+    white-space: nowrap; flex: none;
+  }
+  .cat-household { background: var(--household-soft); color: var(--household); }
+  .cat-organizing { background: var(--organizing-soft); color: var(--organizing); }
+  .card h3 { font-size: 16px; margin: 0; letter-spacing: -.01em; line-height: 1.3; }
+  .card .company { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+  .flags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .flag {
+    font-size: 10.5px; font-weight: 650; letter-spacing: .02em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 6px;
+  }
+  .flag-example { background: var(--accent-soft); color: var(--accent-ink); }
+  .flag-scope { background: var(--warn-soft); color: var(--warn); }
+  .flag-verified { background: var(--good-soft); color: var(--good); display: inline-flex; align-items: center; gap: 4px; }
+  .flag-verified::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--good); }
+
+  .meta { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; font-size: 13px; }
+  .meta .mk { color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+  .meta .mv { color: var(--ink-soft); }
+  .meta .mv.pay { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .ico { width: 14px; height: 14px; flex: none; opacity: .7; }
+
+  .card-foot { display: flex; align-items: center; gap: 8px; margin-top: 2px; padding-top: 12px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+  .src {
+    font-size: 11.5px; color: var(--ink-soft); background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; font-weight: 550;
+  }
+  .foot-spacer { flex: 1; }
+  .btn {
+    appearance: none; font-family: inherit; cursor: pointer; font-size: 12px; font-weight: 600;
+    border-radius: 8px; padding: 6px 10px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--ink-soft);
+    display: inline-flex; align-items: center; gap: 5px; transition: all .14s;
+  }
+  .btn:hover { color: var(--ink); border-color: var(--muted); }
+  .btn-fit[aria-pressed="true"] { background: var(--good); border-color: var(--good); color: #fff; }
+  .btn-pass[aria-pressed="true"] { background: var(--muted); border-color: var(--muted); color: var(--paper); }
+  .btn-link { text-decoration: none; }
+  .btn-link:hover { border-color: var(--accent); color: var(--accent); }
+
+  .empty { text-align: center; color: var(--muted); padding: 60px 0; font-size: 14px; }
+
+  /* Sources view */
+  .src-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 20px 0 46px; }
+  @media (max-width: 820px) { .src-grid { grid-template-columns: 1fr; } }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+  .panel-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .panel-head .cat-tag { font-size: 12px; }
+  .panel h3 { margin: 0; font-size: 17px; letter-spacing: -.01em; }
+  .panel > p { color: var(--ink-soft); font-size: 13.5px; margin: 10px 0 18px; }
+  .srcrow { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--border); }
+  .srcrow:first-of-type { border-top: 0; }
+  .srcrow .rank { font-size: 12px; font-weight: 700; color: var(--paper); background: var(--accent); width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; flex: none; font-variant-numeric: tabular-nums; }
+  .srcrow .body { flex: 1; }
+  .srcrow .name { font-weight: 600; font-size: 14px; }
+  .srcrow .name .tier { font-size: 10.5px; font-weight: 650; text-transform: uppercase; letter-spacing: .04em; color: var(--accent); margin-left: 8px; }
+  .srcrow .name .tier.tested { color: var(--good); }
+  .srcrow .desc { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+  a.srcrow { text-decoration: none; color: inherit; border-radius: 8px; margin: 0 -8px; padding-left: 8px; padding-right: 8px; transition: background .14s; }
+  a.srcrow:hover { background: var(--surface-2); }
+  a.srcrow .name::after { content: " ↗"; color: var(--muted); font-weight: 500; }
+
+  footer.foot { border-top: 1px solid var(--border); padding: 22px 0 40px; color: var(--muted); font-size: 12.5px; }
+  footer.foot strong { color: var(--ink-soft); font-weight: 600; }
+
+  /* Freshness tile */
+  .fresh { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:var(--ink-soft); background:var(--surface-2); border:1px solid var(--border); padding:3px 8px; border-radius:7px; white-space:nowrap; flex:none; }
+  .fresh .fdot { width:6px; height:6px; border-radius:50%; background:var(--good); }
+  .fresh.stale .fdot { background:var(--muted); }
+  .fresh.rolling .fdot { background:var(--accent); }
+  .fresh.unknown .fdot { background:var(--border-strong); }
+  .note-pill { font-size:12px; color:var(--ink-soft); background:var(--warn-soft); border:1px solid color-mix(in srgb,var(--warn) 20%,transparent); border-radius:8px; padding:7px 10px; display:flex; gap:6px; align-items:flex-start; line-height:1.4; }
+  .note-pill.fit { background:var(--good-soft); border-color:color-mix(in srgb,var(--good) 20%,transparent); }
+
+  /* Modal */
+  .overlay { position:fixed; inset:0; background:rgba(20,22,19,.55); backdrop-filter:blur(3px); display:grid; place-items:center; z-index:50; padding:20px; }
+  .overlay[hidden]{ display:none; }
+  .modal { background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow-lift); width:min(520px,100%); padding:22px; animation:pop .18s ease both; }
+  @keyframes pop { from { opacity:0; transform:scale(.97) translateY(6px); } to { opacity:1; transform:none; } }
+  .modal .eyebrow-m { font-size:11px; letter-spacing:.1em; text-transform:uppercase; font-weight:650; }
+  .modal h3 { margin:5px 0 3px; font-size:17px; letter-spacing:-.01em; }
+  .modal .sub { color:var(--muted); font-size:13px; margin-bottom:16px; }
+  .modal .rchips { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:12px; }
+  .rchip { cursor:pointer; font-family:inherit; font-size:12.5px; font-weight:550; padding:6px 11px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--ink-soft); transition:all .13s; }
+  .rchip:hover { border-color:var(--border-strong); color:var(--ink); }
+  .rchip[aria-pressed="true"] { background:var(--accent-soft); color:var(--accent-ink); border-color:color-mix(in srgb,var(--accent) 35%,transparent); }
+  .modal label.tl { display:block; font-size:12px; font-weight:650; color:var(--ink-soft); margin-bottom:7px; }
+  .modal textarea, .settings textarea { width:100%; font-family:inherit; font-size:13.5px; color:var(--ink); background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:10px 12px; resize:vertical; line-height:1.5; box-sizing:border-box; }
+  .modal textarea:focus, .settings textarea:focus { outline:none; border-color:var(--accent); }
+  .modal-foot { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
+  .btn-primary { background:var(--accent); border-color:var(--accent); color:#fff; padding:9px 16px; font-size:13px; }
+  .btn-primary:hover { color:#fff; border-color:var(--accent); filter:brightness(1.06); }
+  .btn-ghost { padding:9px 14px; font-size:13px; }
+
+  /* Settings / training */
+  .settings { padding:20px 0 46px; display:grid; gap:18px; }
+  .prefs { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+  .prefs h3 { margin:0 0 4px; font-size:16px; letter-spacing:-.01em; }
+  .prefs p.hint { color:var(--muted); font-size:13px; margin:0 0 16px; max-width:70ch; }
+  .pref-field { margin-bottom:14px; }
+  .pref-field:last-child { margin-bottom:0; }
+  .pref-field label { display:block; font-size:11.5px; font-weight:650; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-bottom:6px; }
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media (max-width:820px){ .two-col{ grid-template-columns:1fr; } }
+  .tlist { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); }
+  .tlist h3 { margin:0 0 12px; font-size:15px; display:flex; align-items:center; gap:8px; }
+  .tlist h3 .cnt { font-size:12px; color:var(--muted); font-weight:600; margin-left:auto; }
+  .titem { border-top:1px solid var(--border); padding:13px 0; }
+  .titem:first-of-type { border-top:0; padding-top:0; }
+  .titem .th { display:flex; justify-content:space-between; gap:10px; align-items:baseline; }
+  .titem .tt { font-weight:600; font-size:14px; }
+  .titem .tc { font-size:12px; color:var(--muted); }
+  .titem .rm { cursor:pointer; background:none; border:0; color:var(--muted); font-size:12px; font-family:inherit; flex:none; }
+  .titem .rm:hover { color:var(--warn); }
+  .titem textarea { margin-top:8px; min-height:48px; }
+  .empty-s { color:var(--muted); font-size:13px; padding:6px 0; }
+
+  @media (prefers-reduced-motion: reduce) { *, .modal { animation: none !important; transition: none !important; } }
+  .fade { animation: fade .4s ease both; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="mark">KC</div>
+    <div class="brand">
+      <h1>Austin Role Finder</h1>
+      <p>Kingsley's job hunt · candidate shortlist</p>
+    </div>
+    <div class="top-spacer"></div>
+    <div class="top-note">Review each role → mark <strong>Right fit</strong> or <strong>Not for me</strong></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <div class="eyebrow">Confirm the target</div>
+    <h2>Are these the kinds of roles you want?</h2>
+    <p>A first pass of live Austin openings and hiring channels across the two directions we talked about — <strong>household &amp; family</strong> roles and <strong>professional organizing</strong> roles. Skim them, then tag each one so we know exactly what to chase daily. Your picks save automatically on this device.</p>
+  </section>
+
+  <section class="stats" id="stats"></section>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-view="roles" id="tab-roles">Candidate roles</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="sources" id="tab-sources">Where to find them</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="settings" id="tab-settings">Settings &amp; training</button>
+  </div>
+
+  <section id="view-roles">
+    <div class="controls" id="controls"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section id="view-sources" hidden>
+    <div class="src-grid" id="srcgrid"></div>
+  </section>
+
+  <section id="view-settings" hidden>
+    <div class="settings">
+      <div class="prefs">
+        <h3>What the daily search should look for</h3>
+        <p class="hint">These two notes are the plain-English instructions that will steer Kingsley's automated daily search in Phase&nbsp;3. Every time she tags a role below, her reason feeds back into these. Edit them anytime — they save automatically.</p>
+        <div class="pref-field">
+          <label>✓ Prioritize roles that…</label>
+          <textarea id="pref-include" rows="3"></textarea>
+        </div>
+        <div class="pref-field">
+          <label>✕ Avoid roles that…</label>
+          <textarea id="pref-exclude" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="tlist" id="tlist-fit"></div>
+        <div class="tlist" id="tlist-pass"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p><strong>How to read this:</strong> <em>Verified live</em> cards were opened and confirmed as active Austin postings on Jul 18, 2026. <em>Your example</em> = the posts you sent me. <em>Confirm scope</em> = not Austin-based (travel or San Antonio) — tell me if those count.</p>
+    <p><strong>About the links:</strong> Individual Indeed/LinkedIn job URLs expire within days (every single-post link I tested was already dead), so the buttons open the <em>evergreen search</em> that surfaces each role — always current, never a 404. Direct company links (Graceful Spaces, Moxie Space) go straight to their careers page.</p>
+    <p style="margin-bottom:0">Next step once you confirm: I turn the greenlit types into a daily tracked search + tailored applications you review before sending. No auto-submitting, no accounts created without you.</p>
+  </footer>
+</main>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="eyebrow-m" id="modal-eyebrow"></div>
+    <h3 id="modal-title"></h3>
+    <div class="sub" id="modal-sub"></div>
+    <div class="rchips" id="modal-chips"></div>
+    <label class="tl" for="modal-note" id="modal-note-label"></label>
+    <textarea id="modal-note" rows="3" placeholder="Add a note in Kingsley's words…"></textarea>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Links point to TESTED destinations (verified 2026-07-18). Individual LinkedIn/Indeed
+  // job URLs expire within days, so verified roles link to the evergreen SEARCH that surfaces them.
+  const L = {
+    inNanny: 'https://www.indeed.com/jobs?q=nanny&l=Austin%2C+TX',
+    inHM: 'https://www.indeed.com/jobs?q=household+manager&l=Austin%2C+TX',
+    inPO: 'https://www.indeed.com/jobs?q=professional+organizer&l=Austin%2C+TX',
+    liHM: 'https://www.linkedin.com/jobs/household-manager-jobs-austin-texas-metropolitan-area',
+    liFA: 'https://www.linkedin.com/jobs/family-assistant-jobs-austin-texas-metropolitan-area',
+    liPO: 'https://www.linkedin.com/jobs/professional-organizing-jobs-austin-texas-metropolitan-area',
+    graceful: 'https://graceful-spaces.com/careers',
+  };
+  const ROLES = [
+    // ---------- Household & Family — VERIFIED LIVE 2026-07-18 ----------
+    { id:'r1', cat:'household', title:'Full-Time Nanny — active family', company:'The Nanny League', loc:'Austin, TX 78660', schedule:'Full-time', pay:'$35–40/hr', src:'Indeed', apply:'Indeed', url:L.inNanny, verified:true },
+    { id:'r2', cat:'household', title:'Household Manager / Nanny', company:'A Perfect Fit Nanny Agency', loc:'Austin, TX 78723 (Windsor Park)', schedule:'Full-time, long-term', pay:'$32–37/hr', src:'Indeed', apply:'Easy Apply', url:L.inHM, verified:true },
+    { id:'r3', cat:'household', title:'Personal Assistant / Household Manager', company:'MOD Assistants', loc:'Austin, TX 78701 (Downtown)', schedule:'Full-time', pay:'$24/hr', src:'Indeed', apply:'Easy Apply', url:L.inHM, verified:true },
+    { id:'r4', cat:'household', title:'Household Assistant & Childcare Support', company:'Sage Haus', loc:'Austin, TX', schedule:'Part-time · 10–15 hr · Mon–Fri', pay:'$28–32/hr', src:'Indeed', apply:'Easy Apply', url:L.inHM, verified:true },
+    { id:'r5', cat:'household', title:'Part-Time Nanny (Round Rock)', company:'That Nanny Place LLC', loc:'Austin, TX 78745', schedule:'Part-time · 20–25 hr · Mon–Fri', pay:'$26–28/hr', src:'Indeed', apply:'Easy Apply', url:L.inNanny, verified:true },
+    { id:'r6', cat:'household', title:'Head Housekeeper / House Manager', company:'Nanny & Butler', loc:'Austin, TX', schedule:'Full-time', pay:'DOE', src:'LinkedIn', apply:'LinkedIn', url:L.liHM, verified:true, posted:'2026-06-18' },
+    // ---------- Household & Family — leads / agencies / your examples ----------
+    { id:'r7', cat:'household', title:'Family Assistant / Household Manager / Nanny', company:'Private family via Simplified Austin', loc:'Austin, TX', schedule:'Full-time', pay:'DOE', src:'Indeed · simplifiedaustin.com', apply:'Agency site', url:L.inHM, example:true },
+    { id:'r8', cat:'household', title:'Estate Manager (UHNW private family)', company:'via Career Group / Seaside / agencies', loc:'Austin, TX', schedule:'Full-time', pay:'$65k–180k+ / yr', src:'LinkedIn · Indeed', apply:'Agency', url:L.liHM },
+    { id:'r9', cat:'household', title:'Nanny / Family Assistant — talent pool', company:'Moms Best Friend (agency)', loc:'Austin, TX', schedule:'Varies by placement', pay:'DOE', src:'Agency', apply:'Candidate app · 512-346-2229', url:'https://www.momsbestfriend.com/austin/candidate-application/' },
+    { id:'r10', cat:'household', title:'Nanny (ongoing families)', company:'Care.com · Sittercity · Nanny Lane', loc:'Austin, TX', schedule:'Full & part-time', pay:'$17–26/hr', src:'Platform', apply:'Platform profile', url:L.inNanny },
+    { id:'r11', cat:'household', title:'Multi-Residence "Grounded" Nanny / Family Assistant', company:'Global private family', loc:'Multi-residence / travel', schedule:'Full-time, live-in/travel', pay:'High-end DOE', src:'Indeed', apply:'Indeed', url:'https://www.indeed.com/viewjob?jk=fc2fc829d0f3053d', example:true, scope:'Not Austin-based' },
+    // ---------- Professional Organizing — VERIFIED LIVE 2026-07-18 ----------
+    { id:'r12', cat:'organizing', title:'Home Organizer (+ Laundry Specialist)', company:'The Cesta', loc:'Austin 78701 · also Lakeway', schedule:'Part-time · flexible · on-call', pay:'$22–30/hr', src:'Indeed', apply:'Easy Apply · replies in ~1 day', url:L.inPO, verified:true },
+    { id:'r13', cat:'organizing', title:'Project Lead — Organizing', company:'Graceful Spaces', loc:'Austin, TX', schedule:'Mon–Fri, 7a–7p availability', pay:'DOE', src:'Direct site', apply:'Careers form', url:L.graceful, verified:true },
+    { id:'r14', cat:'organizing', title:'Lead Organizer', company:'Graceful Spaces', loc:'Austin, TX', schedule:'Mon–Fri, 7a–6p projects', pay:'DOE', src:'Direct site', apply:'Careers form', url:L.graceful, verified:true, example:true },
+    { id:'r15', cat:'organizing', title:'Professional Organizer (Support / Associate)', company:'Graceful Spaces', loc:'Austin, TX', schedule:'Flexible, 22+ hrs · Mon–Thu', pay:'DOE', src:'Direct site', apply:'Careers form', url:L.graceful, verified:true },
+    // ---------- Professional Organizing — leads / direct ----------
+    { id:'r16', cat:'organizing', title:'Professional Organizer', company:'Moxie Space', loc:'Austin, TX', schedule:'Project-based', pay:'DOE', src:'Direct site · Instagram', apply:'Site / DM', url:'https://moxiespace.com/' },
+    { id:'r17', cat:'organizing', title:'Organizer — register / inquire', company:'NEAT Method Austin + local studios', loc:'Austin, TX', schedule:'Varies', pay:'DOE', src:'Direct site · Instagram · NAPO', apply:'Site / DM' },
+    { id:'r18', cat:'organizing', title:'Organizing Assistant', company:'Neatsie LLC', loc:'San Antonio, TX', schedule:'Flexible · weekly pay', pay:'DOE', src:'Company portal', apply:'portal.neatsiellc.com', url:'https://neatsiellc.com/careers/', scope:'San Antonio, not Austin' },
+  ];
+
+  const SOURCES = {
+    household: {
+      label:'Household & Family',
+      tagClass:'cat-household',
+      blurb:'Best signal comes from specialized household-staffing agencies (they screen and place directly), then the big job boards, then local networks. Register with 2–3 agencies once — they keep matching you.',
+      items:[
+        { name:'Household staffing agencies', tier:'Highest signal', desc:'Moms Best Friend, Seaside Staffing, Riveter, Mahler, British American Household Staffing, A Perfect Fit, Nanny & Butler. One intake → ongoing matches.' },
+        { name:'Indeed — household manager (Austin)', tier:'Tested ✓', desc:'Live now: A Perfect Fit $32–37/hr, MOD Assistants $24/hr, Sage Haus $28–32/hr. Set a daily alert.', url:L.inHM },
+        { name:'Indeed — nanny (Austin)', tier:'Tested ✓', desc:'Live now: The Nanny League $35–40/hr, That Nanny Place $26–28/hr.', url:L.inNanny },
+        { name:'LinkedIn — household manager (Austin)', tier:'Tested ✓', desc:'Best for MANAGER-level roles. Note: individual post links expire fast — use this evergreen search + turn on alerts.', url:L.liHM },
+        { name:'Care.com · Sittercity · Nanny Lane', tier:'', desc:'Direct-with-family nanny roles. Profile-based; families reach out to you.' },
+        { name:'Local networks', tier:'', desc:'Eanes ISD care board, Austin nanny Facebook groups, Nextdoor. Lower volume, higher trust.' },
+      ]
+    },
+    organizing: {
+      label:'Professional Organizing',
+      tagClass:'cat-organizing',
+      blurb:'This category barely lives on job boards — organizing companies hire off their own site and Instagram. Go direct to the studios and register, even with no posting up.',
+      items:[
+        { name:'Graceful Spaces — careers', tier:'Tested ✓', desc:'3 live Austin roles: Project Lead, Lead Organizer, Professional Organizer. Apply via their form.', url:L.graceful },
+        { name:'Indeed — professional organizer (Austin)', tier:'Tested ✓', desc:'Live now: The Cesta $22–30/hr (replies in ~1 day). Go direct too.', url:L.inPO },
+        { name:'Instagram', tier:'', desc:'Organizing studios post "we\'re hiring" to Stories first. Follow + DM local Austin organizers (Moxie Space, NEAT Method, The Cesta).' },
+        { name:'LinkedIn — professional organizing (Austin)', tier:'Tested ✓', desc:'Thinner niche but worth a standing alert.', url:L.liPO },
+        { name:'NAPO directory', tier:'', desc:'National Assoc. of Productivity & Organizing Pros — find every Austin studio, then approach each one.' },
+      ]
+    }
+  };
+
+  const CATS = { household:{label:'Household & Family', cls:'cat-household', color:'var(--household)'}, organizing:{label:'Professional Organizing', cls:'cat-organizing', color:'var(--organizing)'} };
+  const CHECK_DATE = '2026-07-18';              // date the verified roles were confirmed live
+  const ROLLING = new Set(['r8','r9','r10','r16','r17']); // agency / platform / rolling openings
+  const STORE='kc-role-status-v1', NSTORE='kc-role-notes-v1', PSTORE='kc-prefs-v1';
+  const load = (k,d)=>{ try { return JSON.parse(localStorage.getItem(k) || d); } catch(e){ return JSON.parse(d); } };
+  let status = load(STORE,'{}');
+  let notes = load(NSTORE,'{}');
+  const DEFAULT_PREFS = {
+    include: "Austin metro only. Household & family roles (nanny, family assistant, house / household / estate manager) and professional organizing roles. Pay ideally $25/hr+ or salaried equivalent. Long-term / full-time preferred.",
+    exclude: "Senior / elder home-care & caregiver agency roles. Commercial or HOA property management. Restaurant 'front of house' manager roles. Non-Austin roles (travel / live-in or San Antonio) unless flagged OK."
+  };
+  let prefs = Object.assign({}, DEFAULT_PREFS, load(PSTORE,'{}'));
+  const save = () => { try {
+    localStorage.setItem(STORE, JSON.stringify(status));
+    localStorage.setItem(NSTORE, JSON.stringify(notes));
+    localStorage.setItem(PSTORE, JSON.stringify(prefs));
+  } catch(e){} };
+  const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+
+  function relTime(iso){
+    const then = new Date(iso+'T00:00:00'), now = new Date();
+    const d = Math.round((now - then)/86400000);
+    if (d <= 0) return 'today';
+    if (d === 1) return 'yesterday';
+    if (d < 7) return d+'d ago';
+    if (d < 30) return Math.round(d/7)+'w ago';
+    if (d < 365) return Math.round(d/30)+'mo ago';
+    return Math.round(d/365)+'y ago';
+  }
+  function freshness(r){
+    if (r.posted) return { cls:'', text:'Posted '+relTime(r.posted) };
+    if (r.verified) return { cls:'', text:'Verified '+relTime(CHECK_DATE) };
+    if (ROLLING.has(r.id)) return { cls:'rolling', text:'Rolling / ongoing' };
+    return { cls:'unknown', text:'Date unknown' };
+  }
+
+  let filter = 'all';
+  let query = '';
+
+  const ICONS = {
+    loc:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+    time:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    pay:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5a2.5 2 0 0 1 5 0c0 1.5-5 1-5 2.8a2.5 2 0 0 0 5 0"/></svg>'
+  };
+
+  function renderStats() {
+    const total = ROLES.length;
+    const hh = ROLES.filter(r=>r.cat==='household').length;
+    const org = ROLES.filter(r=>r.cat==='organizing').length;
+    const fit = Object.values(status).filter(v=>v==='fit').length;
+    const verified = ROLES.filter(r=>r.verified).length;
+    const html = [
+      { k:'Candidate roles', v:total },
+      { k:'Verified live · Jul 18', v:verified },
+      { k:'Household & family', v:hh },
+      { k:'Professional organizing', v:org },
+      { k:'Marked right fit', v:fit, accent:true },
+    ].map(s=>`<div class="stat ${s.accent?'accent':''}"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join('');
+    document.getElementById('stats').innerHTML = html;
+  }
+
+  function renderControls() {
+    const counts = { all: ROLES.length, verified: ROLES.filter(r=>r.verified).length, household: ROLES.filter(r=>r.cat==='household').length, organizing: ROLES.filter(r=>r.cat==='organizing').length };
+    const chips = [
+      { key:'all', label:'All roles', dot:null },
+      { key:'verified', label:'Verified live', dot:'var(--good)' },
+      { key:'household', label:'Household & family', dot:'var(--household)' },
+      { key:'organizing', label:'Professional organizing', dot:'var(--organizing)' },
+    ].map(c=>`<button class="chip" data-filter="${c.key}" aria-pressed="${filter===c.key}">
+        ${c.dot?`<span class="dot" style="background:${c.dot}"></span>`:''}${c.label}<span class="count">${counts[c.key]}</span>
+      </button>`).join('');
+    document.getElementById('controls').innerHTML = chips +
+      `<span class="spacer"></span><input class="search" id="search" type="search" placeholder="Search roles…" value="${query.replace(/"/g,'&quot;')}" />`;
+    document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ filter=b.dataset.filter; renderControls(); renderGrid(); });
+    const s = document.getElementById('search');
+    s.oninput = (e)=>{ query = e.target.value; renderGrid(); };
+  }
+
+  function card(r) {
+    const st = status[r.id];
+    const c = CATS[r.cat];
+    const fr = freshness(r);
+    const flags = [
+      r.verified ? '<span class="flag flag-verified">Verified live</span>' : '',
+      r.example ? '<span class="flag flag-example">Your example</span>' : '',
+      r.scope ? `<span class="flag flag-scope">Confirm scope</span>` : '',
+    ].join('');
+    const isSearch = r.url && (/jobs\?q=|texas-metropolitan-area/.test(r.url));
+    const linkBtn = r.url ? `<a class="btn btn-link" href="${r.url}" target="_blank" rel="noopener">${isSearch?'Live search ↗':'View post ↗'}</a>` : '';
+    return `<article class="card ${st==='fit'?'done-fit':''} ${st==='pass'?'done-pass':''}" data-id="${r.id}">
+      <div class="card-head">
+        <div style="flex:1">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+            <span class="cat-tag ${c.cls}">${c.label}</span>${flags}
+          </div>
+          <h3>${r.title}</h3>
+          <div class="company">${r.company}</div>
+        </div>
+        <span class="fresh ${fr.cls}" title="Posting freshness"><span class="fdot"></span>${fr.text}</span>
+      </div>
+      <div class="meta">
+        <span class="mk">${ICONS.loc}Location</span><span class="mv">${r.loc}${r.scope?` · <span style="color:var(--warn)">${r.scope}</span>`:''}</span>
+        <span class="mk">${ICONS.time}Schedule</span><span class="mv">${r.schedule}</span>
+        <span class="mk">${ICONS.pay}Pay</span><span class="mv pay">${r.pay}</span>
+      </div>
+      ${notes[r.id] ? `<div class="note-pill ${st==='fit'?'fit':''}">✏️ ${esc(notes[r.id])}</div>` : ''}
+      <div class="card-foot">
+        <span class="src">${r.src}</span>
+        ${linkBtn}
+        <span class="foot-spacer"></span>
+        <button class="btn btn-fit" data-act="fit" aria-pressed="${st==='fit'}">✓ Right fit</button>
+        <button class="btn btn-pass" data-act="pass" aria-pressed="${st==='pass'}">Not for me</button>
+      </div>
+    </article>`;
+  }
+
+  function renderGrid() {
+    const q = query.trim().toLowerCase();
+    const list = ROLES.filter(r => (filter==='all' || (filter==='verified' ? r.verified : r.cat===filter)))
+      .filter(r => !q || (r.title+' '+r.company+' '+r.loc+' '+r.src).toLowerCase().includes(q));
+    const grid = document.getElementById('grid');
+    if (!list.length) { grid.innerHTML = '<div class="empty">No roles match — try clearing the search or filter.</div>'; return; }
+    grid.innerHTML = list.map(card).join('');
+    grid.querySelectorAll('.card').forEach(el=>{
+      const id = el.dataset.id;
+      el.querySelectorAll('.btn[data-act]').forEach(btn=>{
+        btn.onclick = ()=>{
+          const act = btn.dataset.act;
+          if (status[id]===act) {            // click again to clear the tag + its note
+            delete status[id]; delete notes[id];
+            save(); renderGrid(); renderStats(); renderSettings();
+          } else {
+            openModal(id, act);              // ask for the "why" so it trains future searches
+          }
+        };
+      });
+    });
+  }
+
+  function renderSources() {
+    const html = Object.values(SOURCES).map(s=>`
+      <div class="panel">
+        <div class="panel-head"><span class="cat-tag ${s.tagClass}">${s.label}</span></div>
+        <p>${s.blurb}</p>
+        ${s.items.map((it,i)=>{
+          const tierCls = it.tier && it.tier.indexOf('Tested')>-1 ? 'tier tested' : 'tier';
+          const inner = `<div class="rank">${i+1}</div>
+            <div class="body"><div class="name">${it.name}${it.tier?`<span class="${tierCls}">${it.tier}</span>`:''}</div>
+            <div class="desc">${it.desc}</div></div>`;
+          return it.url
+            ? `<a class="srcrow" href="${it.url}" target="_blank" rel="noopener">${inner}</a>`
+            : `<div class="srcrow">${inner}</div>`;
+        }).join('')}
+      </div>`).join('');
+    document.getElementById('srcgrid').innerHTML = html;
+  }
+
+  function switchView(v) {
+    document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected', String(t.dataset.view===v)));
+    ['roles','sources','settings'].forEach(name=>{ document.getElementById('view-'+name).hidden = name!==v; });
+    const el = document.getElementById('view-'+v);
+    el.classList.remove('fade'); void el.offsetWidth; el.classList.add('fade');
+  }
+  document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchView(t.dataset.view));
+
+  /* ---------- Reason modal (captures the "why" behind each tag) ---------- */
+  const REASONS = {
+    pass: ['Pay too low','Location / commute','Hours / schedule','Not the right role type','Live-in / travel','Too senior / too junior','The company / agency'],
+    fit:  ['Great pay','Right role type','Good location','Ideal hours','Loves the company','Strong growth path']
+  };
+  let modalState = { id:null, act:null };
+  const $ = id => document.getElementById(id);
+
+  function openModal(id, act){
+    const r = ROLES.find(x=>x.id===id);
+    modalState = { id, act };
+    const isPass = act==='pass';
+    const eb = $('modal-eyebrow');
+    eb.textContent = isPass ? '✕ Not for me' : '✓ Right fit';
+    eb.style.color = isPass ? 'var(--warn)' : 'var(--good)';
+    $('modal-title').textContent = r.title;
+    $('modal-sub').textContent = r.company + ' · ' + r.loc;
+    $('modal-note-label').textContent = isPass
+      ? 'What made this not a fit? — this trains Kingsley’s daily search'
+      : 'What makes this a great fit? (optional — also trains the search)';
+    const note = $('modal-note');
+    note.value = notes[id] || '';
+    const wrap = $('modal-chips');
+    wrap.innerHTML = REASONS[act].map(x=>`<button class="rchip" type="button" aria-pressed="false">${x}</button>`).join('');
+    wrap.querySelectorAll('.rchip').forEach(ch=>{
+      if ((note.value.split(' · ')).includes(ch.textContent)) ch.setAttribute('aria-pressed','true');
+      ch.onclick = ()=>{
+        const on = ch.getAttribute('aria-pressed')==='true';
+        ch.setAttribute('aria-pressed', String(!on));
+        let parts = note.value.split(' · ').map(s=>s.trim()).filter(Boolean);
+        const label = ch.textContent;
+        if (!on) { if (!parts.includes(label)) parts.push(label); }
+        else { parts = parts.filter(p=>p!==label); }
+        note.value = parts.join(' · ');
+      };
+    });
+    $('overlay').hidden = false;
+    note.focus();
+  }
+  function closeModal(){ $('overlay').hidden = true; modalState = { id:null, act:null }; }
+  $('modal-cancel').onclick = closeModal;
+  $('overlay').onclick = e => { if (e.target.id==='overlay') closeModal(); };
+  $('modal-save').onclick = ()=>{
+    const { id, act } = modalState; if (!id) return;
+    status[id] = act;
+    const v = $('modal-note').value.trim();
+    if (v) notes[id] = v; else delete notes[id];
+    save(); closeModal(); renderGrid(); renderStats(); renderSettings();
+  };
+  document.addEventListener('keydown', e => { if (e.key==='Escape' && !$('overlay').hidden) closeModal(); });
+
+  /* ---------- Settings / training ---------- */
+  function renderSettings(){
+    $('pref-include').value = prefs.include;
+    $('pref-exclude').value = prefs.exclude;
+    const build = (kind, title, emptyMsg) => {
+      const items = ROLES.filter(r=>status[r.id]===kind);
+      const head = `<h3>${title}<span class="cnt">${items.length}</span></h3>`;
+      if (!items.length) return head + `<div class="empty-s">${emptyMsg}</div>`;
+      return head + items.map(r=>`
+        <div class="titem">
+          <div class="th">
+            <div><div class="tt">${r.title}</div><div class="tc">${r.company} · ${r.loc}</div></div>
+            <button class="rm" data-id="${r.id}">Remove</button>
+          </div>
+          <textarea data-note="${r.id}" rows="2" placeholder="${kind==='pass'?'Why it wasn’t a fit…':'Why it fits…'}">${esc(notes[r.id]||'')}</textarea>
+        </div>`).join('');
+    };
+    $('tlist-fit').innerHTML  = build('fit', '✓ Right for me', 'Tag roles “Right fit” and they collect here with your notes.');
+    $('tlist-pass').innerHTML = build('pass','✕ Not for me',  'Tag roles “Not for me” and the reasons collect here.');
+    document.querySelectorAll('#view-settings .rm').forEach(b=>b.onclick=()=>{
+      const id=b.dataset.id; delete status[id]; delete notes[id];
+      save(); renderGrid(); renderStats(); renderSettings();
+    });
+    document.querySelectorAll('#view-settings textarea[data-note]').forEach(t=>t.oninput=()=>{
+      const id=t.dataset.note, v=t.value.trim();
+      if (v) notes[id]=v; else delete notes[id];
+      save();
+    });
+  }
+  $('pref-include').oninput = e => { prefs.include = e.target.value; save(); };
+  $('pref-exclude').oninput = e => { prefs.exclude = e.target.value; save(); };
+
+  renderStats(); renderControls(); renderGrid(); renderSources(); renderSettings();
+</script>
