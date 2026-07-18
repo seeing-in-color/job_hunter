@@ -1,0 +1,246 @@
+<meta charset="utf-8" />
+<title>Role Finder · Admin HQ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<style>
+  :root{
+    --paper:#F7F5F0;--surface:#FFFFFF;--surface-2:#FBFAF7;--border:#E7E3DA;--border-strong:#D8D3C7;
+    --ink:#20241F;--ink-soft:#4B524A;--muted:#838A81;
+    --accent:#3B5BA9;--accent-ink:#294277;--accent-soft:#E4E9F5;  /* admin = ink-blue, distinct from finder green */
+    --good:#2E7D57;--good-soft:#DFF0E6;--warn:#B0623F;--warn-soft:#F6E6DD;
+    --shadow:0 1px 2px rgba(32,36,31,.04),0 8px 24px -12px rgba(32,36,31,.14);
+    --shadow-lift:0 2px 4px rgba(32,36,31,.05),0 18px 40px -16px rgba(32,36,31,.22);
+    --radius:14px;--font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;--maxw:1000px;
+  }
+  @media (prefers-color-scheme:dark){ :root{
+    --paper:#131512;--surface:#1C1F1B;--surface-2:#21251F;--border:#2E332C;--border-strong:#3A4038;
+    --ink:#ECEBE3;--ink-soft:#BAC0B6;--muted:#868E82;
+    --accent:#8FA8E0;--accent-ink:#B9CBF0;--accent-soft:#23304C;
+    --good:#6FBE92;--good-soft:#1F3229;--warn:#DA8B66;--warn-soft:#33241C;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.6);
+    --shadow-lift:0 2px 6px rgba(0,0,0,.35),0 22px 46px -18px rgba(0,0,0,.7);
+  }}
+  :root[data-theme="light"]{ --paper:#F7F5F0;--surface:#FFFFFF;--surface-2:#FBFAF7;--border:#E7E3DA;--border-strong:#D8D3C7;--ink:#20241F;--ink-soft:#4B524A;--muted:#838A81;--accent:#3B5BA9;--accent-ink:#294277;--accent-soft:#E4E9F5;--good:#2E7D57;--warn:#B0623F; }
+  :root[data-theme="dark"]{ --paper:#131512;--surface:#1C1F1B;--surface-2:#21251F;--border:#2E332C;--border-strong:#3A4038;--ink:#ECEBE3;--ink-soft:#BAC0B6;--muted:#868E82;--accent:#8FA8E0;--accent-ink:#B9CBF0;--accent-soft:#23304C;--good:#6FBE92;--warn:#DA8B66;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.6);--shadow-lift:0 2px 6px rgba(0,0,0,.35),0 22px 46px -18px rgba(0,0,0,.7); }
+
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:var(--font); background:var(--paper); color:var(--ink); -webkit-font-smoothing:antialiased; line-height:1.5; }
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 24px; }
+
+  header.top{ border-bottom:1px solid var(--border); background:color-mix(in srgb,var(--paper) 88%,transparent); position:sticky; top:0; z-index:20; backdrop-filter:blur(8px); }
+  .top-inner{ display:flex; align-items:center; gap:14px; padding:16px 24px; max-width:var(--maxw); margin:0 auto; }
+  .mark{ width:34px; height:34px; border-radius:9px; flex:none; background:linear-gradient(150deg,var(--accent),color-mix(in srgb,var(--accent) 60%,#9db6ea)); display:grid; place-items:center; color:#fff; font-weight:700; font-size:15px; box-shadow:var(--shadow); }
+  .brand h1{ font-size:15px; margin:0; letter-spacing:-.01em; font-weight:650; }
+  .brand p{ font-size:12px; margin:0; color:var(--muted); }
+  .top-spacer{ flex:1; }
+  .btn{ appearance:none; font-family:inherit; cursor:pointer; font-size:13px; font-weight:600; border-radius:9px; padding:8px 13px; border:1px solid var(--border-strong); background:var(--surface); color:var(--ink-soft); display:inline-flex; align-items:center; gap:7px; transition:all .14s; text-decoration:none; }
+  .btn:hover{ color:var(--ink); border-color:var(--muted); }
+  .btn-primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .btn-primary:hover{ color:#fff; border-color:var(--accent); filter:brightness(1.06); }
+
+  .intro{ padding:34px 0 6px; }
+  .eyebrow{ font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:650; }
+  .intro h2{ font-size:clamp(24px,3.4vw,32px); margin:8px 0 8px; letter-spacing:-.02em; text-wrap:balance; }
+  .intro p{ max-width:60ch; color:var(--ink-soft); margin:0; font-size:15px; }
+
+  .stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:22px 0 4px; }
+  @media (max-width:640px){ .stats{ grid-template-columns:1fr 1fr; } }
+  .stat{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:15px 16px; box-shadow:var(--shadow); }
+  .stat .k{ font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); font-weight:600; }
+  .stat .v{ font-size:26px; font-weight:700; letter-spacing:-.02em; margin-top:4px; font-variant-numeric:tabular-nums; }
+
+  .sec-head{ display:flex; align-items:center; gap:12px; margin:32px 0 4px; }
+  .sec-head h3{ font-size:16px; margin:0; letter-spacing:-.01em; }
+  .sec-head .line{ flex:1; height:1px; background:var(--border); }
+
+  .friends{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; padding:14px 0 10px; }
+  @media (max-width:720px){ .friends{ grid-template-columns:1fr; } }
+  .fcard{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:12px; transition:box-shadow .18s,transform .18s,border-color .18s; }
+  .fcard:hover{ box-shadow:var(--shadow-lift); transform:translateY(-2px); border-color:var(--border-strong); }
+  .fcard.add{ align-items:center; justify-content:center; text-align:center; border-style:dashed; cursor:pointer; color:var(--muted); min-height:150px; gap:8px; }
+  .fcard.add:hover{ color:var(--accent); border-color:var(--accent); }
+  .fcard.add .plus{ font-size:26px; line-height:1; }
+  .fhead{ display:flex; align-items:center; gap:11px; }
+  .avatar{ width:38px; height:38px; border-radius:10px; flex:none; display:grid; place-items:center; font-weight:700; color:#fff; font-size:15px; background:linear-gradient(150deg,var(--accent),color-mix(in srgb,var(--accent) 55%,#9db6ea)); }
+  .avatar.g{ background:linear-gradient(150deg,#2E6B57,#5aa588); } .avatar.b{ background:linear-gradient(150deg,#B0623F,#d08a63); }
+  .fhead .fn{ font-weight:650; font-size:16px; letter-spacing:-.01em; }
+  .fhead .seed{ font-size:10px; font-weight:650; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  .fsum{ font-size:13px; color:var(--ink-soft); flex:1; }
+  .fmeta{ display:flex; flex-wrap:wrap; gap:6px; }
+  .pill{ font-size:11px; color:var(--ink-soft); background:var(--surface-2); border:1px solid var(--border); border-radius:6px; padding:3px 8px; font-weight:550; }
+  .factions{ display:flex; gap:8px; align-items:center; padding-top:12px; border-top:1px solid var(--border); flex-wrap:wrap; }
+  .factions .grow{ flex:1; }
+  .btn-sm{ font-size:12px; padding:6px 10px; }
+  .btn-rm{ border:0; background:none; color:var(--muted); font-size:12px; cursor:pointer; font-family:inherit; }
+  .btn-rm:hover{ color:var(--warn); }
+  .toast{ position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--ink); color:var(--paper); font-size:13px; font-weight:550; padding:10px 16px; border-radius:10px; box-shadow:var(--shadow-lift); opacity:0; pointer-events:none; transition:opacity .2s; z-index:80; }
+  .toast.show{ opacity:1; }
+
+  /* Chat modal */
+  .overlay{ position:fixed; inset:0; background:rgba(18,20,17,.55); backdrop-filter:blur(3px); display:grid; place-items:center; z-index:60; padding:18px; }
+  .overlay[hidden]{ display:none; }
+  .chat{ background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow-lift); width:min(520px,100%); height:min(620px,90vh); display:flex; flex-direction:column; overflow:hidden; animation:pop .18s ease both; }
+  @keyframes pop{ from{ opacity:0; transform:scale(.98) translateY(6px); } to{ opacity:1; transform:none; } }
+  .chat-top{ display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--border); }
+  .chat-top .mark{ width:28px; height:28px; font-size:13px; }
+  .chat-top .t{ font-weight:650; font-size:14px; } .chat-top .s{ font-size:11.5px; color:var(--muted); }
+  .chat-top .x{ margin-left:auto; border:0; background:none; cursor:pointer; color:var(--muted); font-size:18px; }
+  .chat-log{ flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+  .bub{ max-width:80%; padding:10px 13px; border-radius:14px; font-size:13.5px; line-height:1.45; }
+  .bub.bot{ background:var(--surface-2); border:1px solid var(--border); border-bottom-left-radius:5px; align-self:flex-start; }
+  .bub.me{ background:var(--accent); color:#fff; border-bottom-right-radius:5px; align-self:flex-end; }
+  .bub.done{ background:var(--good-soft); border:1px solid color-mix(in srgb,var(--good) 25%,transparent); align-self:stretch; max-width:100%; }
+  .bub .lnk{ display:block; word-break:break-all; font-size:11.5px; color:var(--accent-ink); background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 10px; margin-top:8px; }
+  .bub .dbtns{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .chat-quick{ display:flex; flex-wrap:wrap; gap:7px; padding:0 16px 8px; }
+  .qchip{ cursor:pointer; font-family:inherit; font-size:12.5px; font-weight:550; padding:6px 12px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--ink-soft); }
+  .qchip:hover{ border-color:var(--accent); color:var(--accent); }
+  .chat-input{ display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--border); }
+  .chat-input input{ flex:1; font-family:inherit; font-size:14px; color:var(--ink); background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:10px 13px; }
+  .chat-input input:focus{ outline:none; border-color:var(--accent); }
+
+  footer{ border-top:1px solid var(--border); margin-top:20px; padding:20px 0 40px; color:var(--muted); font-size:12.5px; }
+  footer strong{ color:var(--ink-soft); }
+  @media (prefers-reduced-motion:reduce){ *{ animation:none!important; transition:none!important; } }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="mark">◆</div>
+    <div class="brand"><h1>Role Finder · Admin HQ</h1><p>Your friend job-hunt control center</p></div>
+    <div class="top-spacer"></div>
+    <button class="btn btn-primary" id="add-top">＋ Add a friend</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <div class="eyebrow">Home base</div>
+    <h2>Set up a friend, share their Role Finder in seconds.</h2>
+    <p>Add someone with a few details in a quick chat, and it spins up a personalized Role Finder page — the same kind you saw for Kingsley — with a link you can send them straight away. Everything here is stored on your device.</p>
+  </section>
+
+  <section class="stats" id="stats"></section>
+
+  <div class="sec-head"><h3>Your friends</h3><div class="line"></div></div>
+  <section class="friends" id="friends"></section>
+
+  <footer>
+    <p><strong>How the spin-up works:</strong> the chat builds a brief and encodes it into the Role Finder link (after the <code>#</code>, so it never touches a server). New friends get a starter page — target roles link to live searches instantly — and hand-verified postings get added over time, like Kingsley's and Carrie's.</p>
+  </footer>
+</main>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="chat" role="dialog" aria-modal="true">
+    <div class="chat-top"><div class="mark" style="width:28px;height:28px;font-size:13px">◆</div><div><div class="t">New friend intake</div><div class="s">Answer a few quick questions</div></div><button class="x" id="chat-x" aria-label="Close">✕</button></div>
+    <div class="chat-log" id="chat-log"></div>
+    <div class="chat-quick" id="chat-quick"></div>
+    <form class="chat-input" id="chat-form"><input id="chat-field" autocomplete="off" placeholder="Type your answer…" /><button class="btn btn-primary" type="submit">Send</button></form>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+  // Published Role Finder engine + Kingsley's bespoke page
+  const FINDER_BASE = 'https://claude.ai/code/artifact/9803a126-74e7-498d-89cd-80d35a96ed3a';
+  const KINGSLEY_URL = 'https://claude.ai/code/artifact/11301130-e96e-45b7-b53d-f549d2fefd3a';
+  const STORE = 'rf-admin-friends-v1';
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const enc = obj => btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+  const finderLink = brief => FINDER_BASE + '#p=' + enc(brief);
+
+  const SEED = [
+    { id:'kingsley', name:'Kingsley', avatar:'g', seed:true, location:'Austin, TX',
+      summary:'Household & family + professional organizing roles.', tags:['Austin','Household','Organizing'], url:KINGSLEY_URL },
+    { id:'carrie', name:'Carrie', avatar:'b', seed:true, location:'Austin, TX',
+      summary:'Tech / SaaS sales — Account Executive + SDR/BDR, hybrid (≥2 days in-office).', tags:['Austin','Hybrid','AE','SDR/BDR'], url:FINDER_BASE }
+  ];
+  let friends;
+  try { friends = JSON.parse(localStorage.getItem(STORE)||'null'); } catch(e){ friends=null; }
+  if(!friends){ friends = SEED.slice(); localStorage.setItem(STORE, JSON.stringify(friends)); }
+  const persist = ()=>localStorage.setItem(STORE, JSON.stringify(friends));
+
+  function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),1800); }
+
+  function renderStats(){
+    const shared = friends.filter(f=>f.url).length;
+    const tiles=[{k:'Friends set up',v:friends.length},{k:'Pages ready to share',v:shared},{k:'Verified role hubs',v:friends.filter(f=>f.seed).length}];
+    $('stats').innerHTML = tiles.map(s=>`<div class="stat"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join('');
+  }
+  function renderFriends(){
+    const cards = friends.map(f=>{
+      const tags=(f.tags||[]).map(t=>`<span class="pill">${esc(t)}</span>`).join('');
+      return `<div class="fcard">
+        <div class="fhead"><div class="avatar ${f.avatar||''}">${esc((f.name||'?').slice(0,1).toUpperCase())}</div>
+          <div><div class="fn">${esc(f.name)}</div>${f.seed?'<div class="seed">Verified hub</div>':'<div class="seed" style="color:var(--accent)">Starter page</div>'}</div></div>
+        <div class="fsum">${esc(f.summary||'')}</div>
+        <div class="fmeta">${tags}</div>
+        <div class="factions">
+          <a class="btn btn-sm btn-primary" href="${f.url}" target="_blank" rel="noopener">Open Role Finder ↗</a>
+          <button class="btn btn-sm" data-copy="${f.id}">Copy link</button>
+          <span class="grow"></span>
+          ${f.seed?'':`<button class="btn-rm" data-rm="${f.id}">Remove</button>`}
+        </div></div>`;
+    }).join('');
+    $('friends').innerHTML = cards + `<div class="fcard add" id="add-card"><div class="plus">＋</div><div>Add a friend</div></div>`;
+    $('add-card').onclick = openChat;
+    document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{ const f=friends.find(x=>x.id===b.dataset.copy); navigator.clipboard.writeText(f.url).then(()=>toast('Link copied — send it to '+f.name)); });
+    document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ friends=friends.filter(x=>x.id!==b.dataset.rm); persist(); renderStats(); renderFriends(); });
+  }
+
+  /* ---------------- Chat intake ---------------- */
+  const STEPS = [
+    { key:'name',     bot:"Who are we setting up? First name is fine.", ph:"e.g. Carrie" },
+    { key:'titles',   bot:"Nice. What roles are they targeting? List a few, comma-separated.", ph:"e.g. Account Executive, SDR, BDR" },
+    { key:'buckets',  bot:"Want to group those into 1–2 categories? Tap Skip to auto-group.", ph:"e.g. Account Executive, Sales Development", chips:['Skip'] },
+    { key:'location', bot:"Where should we look?", ph:"e.g. Austin, TX" },
+    { key:'mode',     bot:"What work mode do they want?", chips:['On-site','Hybrid','Remote','Any'] },
+    { key:'level',    bot:"Seniority level?", chips:['Entry','Mid','Senior','Mix'] },
+    { key:'pay',      bot:"Any pay target? (or Skip)", ph:"e.g. $110k+ OTE", chips:['Skip'] },
+    { key:'avoid',    bot:"Anything to avoid? (or Skip)", ph:"e.g. no full-remote, no commission-only", chips:['Skip'] },
+  ];
+  let step=0, draft={};
+
+  function botSay(html, cls){ const b=document.createElement('div'); b.className='bub '+(cls||'bot'); b.innerHTML=html; $('chat-log').appendChild(b); $('chat-log').scrollTop=1e9; return b; }
+  function meSay(text){ const b=document.createElement('div'); b.className='bub me'; b.textContent=text; $('chat-log').appendChild(b); $('chat-log').scrollTop=1e9; }
+  function renderQuick(chips){ $('chat-quick').innerHTML=(chips||[]).map(c=>`<button class="qchip" type="button">${esc(c)}</button>`).join(''); document.querySelectorAll('.qchip').forEach(b=>b.onclick=()=>handleAnswer(b.textContent)); }
+
+  function askStep(){ const s=STEPS[step]; botSay(esc(s.bot)); renderQuick(s.chips); $('chat-field').placeholder=s.ph||'Type your answer…'; $('chat-field').focus(); }
+  function openChat(){ step=0; draft={}; $('chat-log').innerHTML=''; $('overlay').hidden=false; botSay("Hi! I'll set up a friend's Role Finder. It takes about 30 seconds. 👋"); askStep(); }
+  function closeChat(){ $('overlay').hidden=true; $('chat-quick').innerHTML=''; }
+  $('chat-x').onclick=closeChat;
+  $('overlay').onclick=e=>{ if(e.target.id==='overlay') closeChat(); };
+  $('add-top').onclick=openChat;
+
+  function handleAnswer(raw){
+    const s=STEPS[step]; const val=(raw||'').trim();
+    if((s.key==='name'||s.key==='titles'||s.key==='location') && !val){ botSay("Mind giving me that one? It shapes the search."); return; }
+    meSay(val || 'Skip'); $('chat-field').value=''; $('chat-quick').innerHTML='';
+    if(s.key==='titles') draft.titles = val.split(',').map(x=>x.trim()).filter(Boolean);
+    else if(s.key==='buckets') draft.buckets = (/^skip$/i.test(val)||!val)?undefined:val.split(',').map(x=>x.trim()).filter(Boolean);
+    else if(s.key==='pay'||s.key==='avoid') draft[s.key]=/^skip$/i.test(val)?'':val;
+    else draft[s.key]=val;
+    step++;
+    if(step<STEPS.length) askStep(); else finalize();
+  }
+  $('chat-form').onsubmit=e=>{ e.preventDefault(); handleAnswer($('chat-field').value); };
+
+  function finalize(){
+    const modeTxt = draft.mode && draft.mode!=='Any' ? draft.mode : '';
+    const brief = { name:draft.name, titles:draft.titles, buckets:draft.buckets, location:draft.location, mode:modeTxt, level:draft.level, pay:draft.pay, avoid:draft.avoid };
+    const url = finderLink(brief);
+    const id = (draft.name||'friend').toLowerCase().replace(/[^a-z0-9]+/g,'-') + '-' + Math.abs(hash(url)).toString(36).slice(0,4);
+    const tags=[draft.location, modeTxt, draft.level].filter(Boolean);
+    const friend={ id, name:draft.name, avatar:'', location:draft.location, summary:(draft.titles||[]).join(', ')+(draft.level?` · ${draft.level}`:''), tags, url };
+    friends.push(friend); persist(); renderStats(); renderFriends();
+    const b=botSay('','done');
+    b.innerHTML = `<strong>✓ ${esc(draft.name)}'s Role Finder is ready.</strong><br>Their target roles link to live ${esc(draft.location||'')} searches now — I'll add hand-verified postings over time.<span class="lnk">${esc(url)}</span><div class="dbtns"><a class="btn btn-sm btn-primary" href="${url}" target="_blank" rel="noopener">Open it ↗</a><button class="btn btn-sm" id="d-copy">Copy link</button><button class="btn btn-sm" id="d-again">Add another</button></div>`;
+    $('chat-quick').innerHTML=''; $('chat-field').placeholder='Done — add another or close';
+    $('d-copy').onclick=()=>navigator.clipboard.writeText(url).then(()=>toast('Link copied — send it to '+draft.name));
+    $('d-again').onclick=openChat;
+  }
+  function hash(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h<<5)-h+s.charCodeAt(i); h|=0; } return h; }
+
+  renderStats(); renderFriends();
+</script>

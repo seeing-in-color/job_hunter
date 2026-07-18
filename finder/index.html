@@ -1,0 +1,502 @@
+<meta charset="utf-8" />
+<title>Role Finder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<style>
+  :root {
+    --paper:#F7F5F0; --surface:#FFFFFF; --surface-2:#FBFAF7; --border:#E7E3DA; --border-strong:#D8D3C7;
+    --ink:#20241F; --ink-soft:#4B524A; --muted:#838A81;
+    --accent:#2E6B57; --accent-ink:#1E4A3C; --accent-soft:#E1EDE7;
+    --catA:#2E6B57; --catA-soft:#E1EDE7; --catB:#B0623F; --catB-soft:#F4E3D9;
+    --good:#2E7D57; --good-soft:#DFF0E6; --warn:#B0623F; --warn-soft:#F6E6DD;
+    --shadow:0 1px 2px rgba(32,36,31,.04),0 8px 24px -12px rgba(32,36,31,.14);
+    --shadow-lift:0 2px 4px rgba(32,36,31,.05),0 18px 40px -16px rgba(32,36,31,.22);
+    --radius:14px; --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; --maxw:1120px;
+  }
+  @media (prefers-color-scheme:dark){ :root{
+    --paper:#141613; --surface:#1C1F1B; --surface-2:#21251F; --border:#2E332C; --border-strong:#3A4038;
+    --ink:#ECEBE3; --ink-soft:#BAC0B6; --muted:#868E82;
+    --accent:#79C0A5; --accent-ink:#A6DCC8; --accent-soft:#21362E;
+    --catA:#79C0A5; --catA-soft:#21362E; --catB:#DA8B66; --catB-soft:#33241C;
+    --good:#6FBE92; --good-soft:#1F3229; --warn:#DA8B66; --warn-soft:#33241C;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.6);
+    --shadow-lift:0 2px 6px rgba(0,0,0,.35),0 22px 46px -18px rgba(0,0,0,.7);
+  }}
+  :root[data-theme="light"]{ --paper:#F7F5F0;--surface:#FFFFFF;--surface-2:#FBFAF7;--border:#E7E3DA;--border-strong:#D8D3C7;--ink:#20241F;--ink-soft:#4B524A;--muted:#838A81;--accent:#2E6B57;--accent-ink:#1E4A3C;--accent-soft:#E1EDE7;--catA:#2E6B57;--catA-soft:#E1EDE7;--catB:#B0623F;--catB-soft:#F4E3D9;--good:#2E7D57;--good-soft:#DFF0E6;--warn:#B0623F;--warn-soft:#F6E6DD; }
+  :root[data-theme="dark"]{ --paper:#141613;--surface:#1C1F1B;--surface-2:#21251F;--border:#2E332C;--border-strong:#3A4038;--ink:#ECEBE3;--ink-soft:#BAC0B6;--muted:#868E82;--accent:#79C0A5;--accent-ink:#A6DCC8;--accent-soft:#21362E;--catA:#79C0A5;--catA-soft:#21362E;--catB:#DA8B66;--catB-soft:#33241C;--good:#6FBE92;--good-soft:#1F3229;--warn:#DA8B66;--warn-soft:#33241C;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.6);--shadow-lift:0 2px 6px rgba(0,0,0,.35),0 22px 46px -18px rgba(0,0,0,.7); }
+
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:var(--font); background:var(--paper); color:var(--ink); -webkit-font-smoothing:antialiased; line-height:1.5; }
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 24px; }
+
+  header.top{ border-bottom:1px solid var(--border); background:color-mix(in srgb,var(--paper) 86%,transparent); position:sticky; top:0; z-index:20; backdrop-filter:blur(8px); }
+  .top-inner{ display:flex; align-items:center; gap:14px; padding:16px 24px; max-width:var(--maxw); margin:0 auto; }
+  .mark{ width:34px; height:34px; border-radius:9px; flex:none; background:linear-gradient(150deg,var(--accent),color-mix(in srgb,var(--accent) 55%,#7bbfa6)); display:grid; place-items:center; color:#fff; font-weight:700; font-size:14px; box-shadow:var(--shadow); }
+  .brand h1{ font-size:15px; margin:0; letter-spacing:-.01em; font-weight:650; }
+  .brand p{ font-size:12px; margin:0; color:var(--muted); }
+  .top-spacer{ flex:1; }
+  .top-note{ font-size:12px; color:var(--ink-soft); background:var(--accent-soft); border:1px solid color-mix(in srgb,var(--accent) 24%,transparent); padding:6px 12px; border-radius:999px; white-space:nowrap; }
+  @media (max-width:720px){ .top-note{ display:none; } }
+
+  .intro{ padding:30px 0 12px; }
+  .eyebrow{ font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:650; }
+  .intro h2{ font-size:clamp(22px,3.2vw,30px); margin:8px 0 6px; letter-spacing:-.02em; text-wrap:balance; }
+  .intro p{ max-width:64ch; color:var(--ink-soft); margin:0; font-size:15px; }
+
+  .stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; padding:24px 0 6px; }
+  .stat{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:15px 16px; box-shadow:var(--shadow); }
+  .stat .k{ font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); font-weight:600; }
+  .stat .v{ font-size:25px; font-weight:700; letter-spacing:-.02em; margin-top:5px; font-variant-numeric:tabular-nums; }
+  .stat.accent .v{ color:var(--accent); }
+
+  .tabs{ display:flex; gap:4px; margin:26px 0 4px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+  .tab{ appearance:none; background:none; border:0; cursor:pointer; font-family:inherit; font-size:14px; font-weight:550; color:var(--muted); padding:10px 14px; border-bottom:2px solid transparent; margin-bottom:-1px; }
+  .tab[aria-selected="true"]{ color:var(--ink); border-bottom-color:var(--accent); }
+  .tab:hover{ color:var(--ink); }
+
+  .controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:18px 0 6px; }
+  .chip{ appearance:none; font-family:inherit; cursor:pointer; background:var(--surface); border:1px solid var(--border); color:var(--ink-soft); padding:7px 13px; border-radius:999px; font-size:13px; font-weight:550; display:inline-flex; align-items:center; gap:7px; transition:border-color .15s,color .15s,background .15s; }
+  .chip:hover{ border-color:var(--border-strong); color:var(--ink); }
+  .chip[aria-pressed="true"]{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  .chip .dot{ width:8px; height:8px; border-radius:50%; }
+  .chip .count{ font-variant-numeric:tabular-nums; opacity:.6; font-weight:600; }
+  .controls .spacer{ flex:1; }
+  .search{ font-family:inherit; font-size:13px; color:var(--ink); background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:8px 14px; width:190px; transition:border-color .15s; }
+  .search:focus{ outline:none; border-color:var(--accent); }
+  .search::placeholder{ color:var(--muted); }
+
+  .viewseg{ display:inline-flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; background:var(--surface); }
+  .viewseg button{ appearance:none; border:0; background:none; font-family:inherit; font-size:12.5px; font-weight:550; color:var(--muted); padding:7px 12px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background .13s,color .13s; }
+  .viewseg button:not(:last-child){ border-right:1px solid var(--border); }
+  .viewseg button[aria-pressed="true"]{ background:var(--ink); color:var(--paper); }
+  .viewseg button:hover:not([aria-pressed="true"]){ color:var(--ink); }
+
+  .grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; padding:16px 0 40px; }
+  @media (max-width:820px){ .grid{ grid-template-columns:1fr; } }
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 18px 15px; box-shadow:var(--shadow); position:relative; display:flex; flex-direction:column; gap:12px; transition:box-shadow .18s,transform .18s,border-color .18s; }
+  .card:hover{ box-shadow:var(--shadow-lift); transform:translateY(-2px); border-color:var(--border-strong); }
+  .card.done-fit{ border-color:color-mix(in srgb,var(--good) 45%,var(--border)); }
+  .card.done-pass{ opacity:.58; }
+  .card-head{ display:flex; align-items:flex-start; gap:10px; }
+  .cat-tag{ font-size:11px; font-weight:650; letter-spacing:.03em; padding:4px 9px; border-radius:7px; white-space:nowrap; flex:none; }
+  .cat-a{ background:var(--catA-soft); color:var(--catA); }
+  .cat-b{ background:var(--catB-soft); color:var(--catB); }
+  .card h3{ font-size:16px; margin:0; letter-spacing:-.01em; line-height:1.3; }
+  .card .company{ font-size:13px; color:var(--ink-soft); margin-top:2px; }
+  .flags{ display:flex; gap:6px; flex-wrap:wrap; }
+  .flag{ font-size:10.5px; font-weight:650; letter-spacing:.02em; text-transform:uppercase; padding:3px 8px; border-radius:6px; }
+  .flag-example{ background:var(--accent-soft); color:var(--accent-ink); }
+  .flag-scope{ background:var(--warn-soft); color:var(--warn); }
+  .flag-verified{ background:var(--good-soft); color:var(--good); display:inline-flex; align-items:center; gap:4px; }
+  .flag-verified::before{ content:""; width:6px; height:6px; border-radius:50%; background:var(--good); }
+
+  .meta{ display:grid; grid-template-columns:auto 1fr; gap:6px 10px; font-size:13px; }
+  .meta .mk{ color:var(--muted); display:inline-flex; align-items:center; gap:6px; }
+  .meta .mv{ color:var(--ink-soft); }
+  .meta .mv.pay{ font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .ico{ width:14px; height:14px; flex:none; opacity:.7; }
+
+  .fresh{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:var(--ink-soft); background:var(--surface-2); border:1px solid var(--border); padding:3px 8px; border-radius:7px; white-space:nowrap; flex:none; }
+  .fresh .fdot{ width:6px; height:6px; border-radius:50%; background:var(--good); }
+  .fresh.rolling .fdot{ background:var(--accent); }
+  .fresh.unknown .fdot{ background:var(--border-strong); }
+  .note-pill{ font-size:12px; color:var(--ink-soft); background:var(--warn-soft); border:1px solid color-mix(in srgb,var(--warn) 20%,transparent); border-radius:8px; padding:7px 10px; display:flex; gap:6px; align-items:flex-start; line-height:1.4; }
+  .note-pill.fit{ background:var(--good-soft); border-color:color-mix(in srgb,var(--good) 20%,transparent); }
+
+  .card-foot{ display:flex; align-items:center; gap:8px; margin-top:2px; padding-top:12px; border-top:1px solid var(--border); flex-wrap:wrap; }
+  .src{ font-size:11.5px; color:var(--ink-soft); background:var(--surface-2); border:1px solid var(--border); border-radius:6px; padding:3px 8px; font-weight:550; }
+  .foot-spacer{ flex:1; }
+  .btn{ appearance:none; font-family:inherit; cursor:pointer; font-size:12px; font-weight:600; border-radius:8px; padding:6px 10px; border:1px solid var(--border-strong); background:var(--surface); color:var(--ink-soft); display:inline-flex; align-items:center; gap:5px; transition:all .14s; }
+  .btn:hover{ color:var(--ink); border-color:var(--muted); }
+  .btn-fit[aria-pressed="true"]{ background:var(--good); border-color:var(--good); color:#fff; }
+  .btn-pass[aria-pressed="true"]{ background:var(--muted); border-color:var(--muted); color:var(--paper); }
+  .btn-link{ text-decoration:none; }
+  .btn-link:hover{ border-color:var(--accent); color:var(--accent); }
+  .empty{ text-align:center; color:var(--muted); padding:60px 0; font-size:14px; }
+
+  .rowacts{ display:inline-flex; gap:5px; align-items:center; white-space:nowrap; }
+  .rowacts .btn{ padding:3px 8px; font-size:11px; }
+  .rrole{ font-weight:600; color:inherit; text-decoration:none; }
+  a.rrole:hover{ color:var(--accent); }
+  .tbl-wrap{ overflow-x:auto; padding:16px 0 44px; }
+  table.rtable{ width:100%; border-collapse:collapse; font-size:13px; }
+  .rtable th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:650; padding:9px 12px; border-bottom:1.5px solid var(--border-strong); white-space:nowrap; }
+  .rtable td{ padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:middle; white-space:nowrap; }
+  .rtable tr:hover td{ background:var(--surface-2); }
+  .rtable .pay{ font-variant-numeric:tabular-nums; font-weight:600; }
+  .rtable td.wrap{ white-space:normal; min-width:180px; }
+  .rtable .stt{ width:9px; height:9px; border-radius:50%; display:inline-block; background:var(--border-strong); }
+  .rtable .stt.fit{ background:var(--good); } .rtable .stt.pass{ background:var(--muted); }
+  .rtable .cat-tag{ font-size:10px; }
+  .xl-wrap{ overflow-x:auto; padding:16px 0 44px; }
+  table.xtable{ border-collapse:collapse; font-size:12.5px; background:var(--surface); border:1px solid var(--border-strong); font-variant-numeric:tabular-nums; }
+  .xtable th,.xtable td{ border:1px solid var(--border); padding:6px 10px; white-space:nowrap; text-align:left; }
+  .xtable thead .colhead th{ background:var(--surface-2); color:var(--muted); font-weight:600; text-align:center; font-size:10.5px; }
+  .xtable thead .namehead th{ background:var(--surface-2); color:var(--ink-soft); font-weight:650; font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+  .xtable td.rownum,.xtable th.rownum{ background:var(--surface-2); color:var(--muted); text-align:center; width:36px; font-size:11px; }
+  .xtable tbody tr:nth-child(even) td:not(.rownum){ background:color-mix(in srgb,var(--surface-2) 55%,transparent); }
+  .xtable tbody tr:hover td{ background:var(--accent-soft); }
+  .xtable .pay{ font-weight:600; } .xtable .cat-tag{ font-size:10px; }
+
+  .src-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:20px 0 46px; }
+  @media (max-width:820px){ .src-grid{ grid-template-columns:1fr; } }
+  .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+  .panel-head{ display:flex; align-items:center; gap:10px; margin-bottom:4px; }
+  .panel-head .cat-tag{ font-size:12px; }
+  .panel h3{ margin:0; font-size:17px; letter-spacing:-.01em; }
+  .panel>p{ color:var(--ink-soft); font-size:13.5px; margin:10px 0 18px; }
+  .srcrow{ display:flex; gap:12px; padding:12px 0; border-top:1px solid var(--border); }
+  .srcrow:first-of-type{ border-top:0; }
+  .srcrow .rank{ font-size:12px; font-weight:700; color:var(--paper); background:var(--accent); width:22px; height:22px; border-radius:6px; display:grid; place-items:center; flex:none; font-variant-numeric:tabular-nums; }
+  .srcrow .body{ flex:1; }
+  .srcrow .name{ font-weight:600; font-size:14px; }
+  .srcrow .name .tier{ font-size:10.5px; font-weight:650; text-transform:uppercase; letter-spacing:.04em; color:var(--accent); margin-left:8px; }
+  .srcrow .name .tier.tested{ color:var(--good); }
+  .srcrow .desc{ font-size:13px; color:var(--ink-soft); margin-top:2px; }
+  a.srcrow{ text-decoration:none; color:inherit; border-radius:8px; margin:0 -8px; padding-left:8px; padding-right:8px; transition:background .14s; }
+  a.srcrow:hover{ background:var(--surface-2); }
+  a.srcrow .name::after{ content:" ↗"; color:var(--muted); font-weight:500; }
+
+  .overlay{ position:fixed; inset:0; background:rgba(20,22,19,.55); backdrop-filter:blur(3px); display:grid; place-items:center; z-index:50; padding:20px; }
+  .overlay[hidden]{ display:none; }
+  .modal{ background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow-lift); width:min(520px,100%); padding:22px; animation:pop .18s ease both; }
+  @keyframes pop{ from{ opacity:0; transform:scale(.97) translateY(6px); } to{ opacity:1; transform:none; } }
+  .modal .eyebrow-m{ font-size:11px; letter-spacing:.1em; text-transform:uppercase; font-weight:650; }
+  .modal h3{ margin:5px 0 3px; font-size:17px; letter-spacing:-.01em; }
+  .modal .sub{ color:var(--muted); font-size:13px; margin-bottom:16px; }
+  .modal .rchips{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:12px; }
+  .rchip{ cursor:pointer; font-family:inherit; font-size:12.5px; font-weight:550; padding:6px 11px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--ink-soft); transition:all .13s; }
+  .rchip:hover{ border-color:var(--border-strong); color:var(--ink); }
+  .rchip[aria-pressed="true"]{ background:var(--accent-soft); color:var(--accent-ink); border-color:color-mix(in srgb,var(--accent) 35%,transparent); }
+  .modal label.tl{ display:block; font-size:12px; font-weight:650; color:var(--ink-soft); margin-bottom:7px; }
+  .modal textarea,.settings textarea{ width:100%; font-family:inherit; font-size:13.5px; color:var(--ink); background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:10px 12px; resize:vertical; line-height:1.5; box-sizing:border-box; }
+  .modal textarea:focus,.settings textarea:focus{ outline:none; border-color:var(--accent); }
+  .modal-foot{ display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
+  .btn-primary{ background:var(--accent); border-color:var(--accent); color:#fff; padding:9px 16px; font-size:13px; }
+  .btn-primary:hover{ color:#fff; border-color:var(--accent); filter:brightness(1.06); }
+  .btn-ghost{ padding:9px 14px; font-size:13px; }
+
+  .settings{ padding:20px 0 46px; display:grid; gap:18px; }
+  .prefs{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+  .prefs h3{ margin:0 0 4px; font-size:16px; letter-spacing:-.01em; }
+  .prefs p.hint{ color:var(--muted); font-size:13px; margin:0 0 16px; max-width:70ch; }
+  .pref-field{ margin-bottom:14px; } .pref-field:last-child{ margin-bottom:0; }
+  .pref-field label{ display:block; font-size:11.5px; font-weight:650; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-bottom:6px; }
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media (max-width:820px){ .two-col{ grid-template-columns:1fr; } }
+  .tlist{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); }
+  .tlist h3{ margin:0 0 12px; font-size:15px; display:flex; align-items:center; gap:8px; }
+  .tlist h3 .cnt{ font-size:12px; color:var(--muted); font-weight:600; margin-left:auto; }
+  .titem{ border-top:1px solid var(--border); padding:13px 0; } .titem:first-of-type{ border-top:0; padding-top:0; }
+  .titem .th{ display:flex; justify-content:space-between; gap:10px; align-items:baseline; }
+  .titem .tt{ font-weight:600; font-size:14px; } .titem .tc{ font-size:12px; color:var(--muted); }
+  .titem .rm{ cursor:pointer; background:none; border:0; color:var(--muted); font-size:12px; font-family:inherit; flex:none; }
+  .titem .rm:hover{ color:var(--warn); }
+  .titem textarea{ margin-top:8px; min-height:48px; }
+  .empty-s{ color:var(--muted); font-size:13px; padding:6px 0; }
+
+  footer.foot{ border-top:1px solid var(--border); padding:22px 0 40px; color:var(--muted); font-size:12.5px; }
+  footer.foot strong{ color:var(--ink-soft); font-weight:600; }
+  @media (prefers-reduced-motion:reduce){ *,.modal{ animation:none!important; transition:none!important; } }
+  .fade{ animation:fade .4s ease both; } @keyframes fade{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="mark" id="brand-mark">RF</div>
+    <div class="brand"><h1 id="brand-title">Role Finder</h1><p id="brand-sub"></p></div>
+    <div class="top-spacer"></div>
+    <div class="top-note">Review each role → mark <strong>Right fit</strong> or <strong>Not for me</strong></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <div class="eyebrow">Confirm the target</div>
+    <h2 id="intro-title">Are these the kinds of roles you want?</h2>
+    <p id="intro-body"></p>
+  </section>
+  <section class="stats" id="stats"></section>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-view="roles">Candidate roles</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="sources">Where to find them</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="settings">Settings &amp; training</button>
+  </div>
+  <section id="view-roles">
+    <div class="controls" id="controls"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+  <section id="view-sources" hidden><div class="src-grid" id="srcgrid"></div></section>
+  <section id="view-settings" hidden>
+    <div class="settings">
+      <div class="prefs">
+        <h3>What the daily search should look for</h3>
+        <p class="hint">These two notes are the plain-English instructions that steer the automated daily search. Every time a role gets tagged below, the reason feeds back here. Edit anytime — saves automatically.</p>
+        <div class="pref-field"><label>✓ Prioritize roles that…</label><textarea id="pref-include" rows="3"></textarea></div>
+        <div class="pref-field"><label>✕ Avoid roles that…</label><textarea id="pref-exclude" rows="3"></textarea></div>
+      </div>
+      <div class="two-col"><div class="tlist" id="tlist-fit"></div><div class="tlist" id="tlist-pass"></div></div>
+    </div>
+  </section>
+  <footer class="foot" id="foot"></footer>
+</main>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="eyebrow-m" id="modal-eyebrow"></div>
+    <h3 id="modal-title"></h3><div class="sub" id="modal-sub"></div>
+    <div class="rchips" id="modal-chips"></div>
+    <label class="tl" id="modal-note-label" for="modal-note"></label>
+    <textarea id="modal-note" rows="3" placeholder="Add a note…"></textarea>
+    <div class="modal-foot"><button class="btn btn-ghost" id="modal-cancel">Cancel</button><button class="btn btn-primary" id="modal-save">Save</button></div>
+  </div>
+</div>
+
+<script>
+/* ============================ DEFAULT PROFILE: CARRIE ============================ */
+const CARRIE = {
+  id:'carrie', mark:'C', title:'Austin Sales Roles', sub:"Carrie's job hunt · candidate shortlist",
+  introTitle:'Are these the kinds of sales roles you want?',
+  introBody:"A first pass of live Austin tech-sales openings across the sales-rep ladder — Account Executive (closing) and Sales Development (SDR/BDR) — leaning toward hybrid / in-office Austin roles (no full-remote), anchored on the Salesforce / SaaS AE profile. Skim them, then tag each so we know what to chase. Your picks save on this device.",
+  checkDate:'2026-07-18',
+  categories:[
+    { key:'ae',  short:'Account Exec', label:'Account Executive', cls:'cat-a', color:'var(--catA)' },
+    { key:'sdr', short:'Sales Dev',    label:'Sales Development',  cls:'cat-b', color:'var(--catB)' }
+  ],
+  prefs:{
+    include:"Austin-based tech / SaaS sales roles, HYBRID (≥2 days in-office) or on-site — no full remote. Mix of levels: SDR / BDR through Account Executive. Salesforce / SaaS / B2B software as the baseline. Base+OTE meaningful (SDR ~$55k+, AE ~$110k+).",
+    exclude:"Fully-remote roles. Outside Austin metro. Commission-only door-to-door / retail / auto-dealer / insurance-churn roles. Roles with no base salary."
+  },
+  roles:[
+    // ---- Account Executive (verified live 2026-07-18) ----
+    { id:'r1', cat:'ae', title:'Account Executive, Commercial (Hospitality)', company:'Amazon Business', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'$69k–121k', src:'Indeed', url:'https://www.indeed.com/jobs?q=account+executive&l=Austin%2C+TX', verified:true },
+    { id:'r2', cat:'ae', title:'Senior Account Executive', company:'Toshiba America Business Solutions', loc:'Austin, TX', schedule:'Full-time · On-site', pay:'$45k–100k', src:'Indeed', url:'https://www.indeed.com/jobs?q=account+executive&l=Austin%2C+TX', verified:true },
+    { id:'r3', cat:'ae', title:'Sales Manager, Mid-Market', company:'AlertMedia', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'DOE', src:'Built In Austin', url:'https://www.builtinaustin.com/jobs/hybrid/sales', verified:true },
+    { id:'r4', cat:'ae', title:'Mid-Market SaaS Account Executive', company:'Zoho', loc:'Austin, TX', schedule:'Full-time · Hybrid (3 days/wk)', pay:'~$120k base', src:'Indeed · company site', url:'https://www.indeed.com/jobs?q=account+executive+SaaS&l=Austin%2C+TX' },
+    { id:'r5', cat:'ae', title:'Enterprise Account Executive', company:'Salesforce', loc:'Austin, TX', schedule:'Full-time · Office-flexible', pay:'$123k–248k OTE', src:'Salesforce Careers', url:'https://careers.salesforce.com/en/jobs/?search=account%20executive&location=Austin', example:true },
+    { id:'r6', cat:'ae', title:'Mid-Market Account Executive', company:'recruitAbility (agency)', loc:'Austin, TX', schedule:'Full-time · Remote-in-Austin', pay:'$110k–130k', src:'Indeed', url:'https://www.indeed.com/jobs?q=account+executive&l=Austin%2C+TX', verified:true, scope:'Remote — Carrie wants ≥2 days in-office' },
+    // ---- Sales Development (verified live 2026-07-18) ----
+    { id:'r7', cat:'sdr', title:'Sales Development Representative', company:'Zello', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'DOE', src:'Built In Austin', url:'https://www.builtinaustin.com/jobs/hybrid/sales', verified:true },
+    { id:'r8', cat:'sdr', title:'Business Development Representative', company:'LumenServe', loc:'Austin, TX 78741', schedule:'Full-time · Hybrid', pay:'$50k–60k', src:'Indeed', url:'https://www.indeed.com/jobs?q=sales+development+representative&l=Austin%2C+TX', verified:true },
+    { id:'r9', cat:'sdr', title:'Enterprise Business Development Representative', company:'ePayPolicy', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'DOE', src:'Built In Austin', url:'https://www.builtinaustin.com/jobs/hybrid/sales', verified:true },
+    { id:'r10', cat:'sdr', title:'Business Development Representative', company:'LogicMonitor', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'DOE', src:'Built In Austin', url:'https://www.builtinaustin.com/jobs/hybrid/sales', verified:true },
+    { id:'r11', cat:'sdr', title:'Business Development Representative', company:'TFLI Limited', loc:'Austin, TX 78701 (Downtown)', schedule:'Full-time · On-site', pay:'$55k–70k', src:'Indeed', url:'https://www.indeed.com/jobs?q=sales+development+representative&l=Austin%2C+TX', verified:true },
+    { id:'r12', cat:'sdr', title:'Entry-Level Sales Development Representative', company:'Vivax Pros', loc:'Austin, TX 78702', schedule:'Full-time · On-site', pay:'$50k–85k', src:'Indeed', url:'https://www.indeed.com/jobs?q=sales+development+representative&l=Austin%2C+TX', verified:true }
+  ],
+  sources:{
+    ae:{ label:'Account Executive', tagClass:'cat-a',
+      blurb:"Austin is a major SaaS hub. Built In Austin (hybrid-filtered) is the sharpest source, then the big boards for AE volume, then target-company career pages — Salesforce being the baseline.",
+      items:[
+        { name:'Built In Austin — Hybrid Sales', tier:'Tested ✓', desc:'Austin-tech only, filtered to Hybrid. Fresh AE roles reposted hourly (Klaviyo, AlertMedia, Vercel, Wise).', url:'https://www.builtinaustin.com/jobs/hybrid/sales' },
+        { name:'Indeed — Account Executive (Austin)', tier:'Tested ✓', desc:'Live: Amazon Business (Hybrid) $69–121k, Toshiba Sr AE $45–100k, recruitAbility $110–130k.', url:'https://www.indeed.com/jobs?q=account+executive+SaaS&l=Austin%2C+TX' },
+        { name:'Salesforce Careers — Austin', tier:'Baseline role', desc:'Enterprise AE Austin $123–248k OTE (office-flexible). The anchor role to pattern-match against.', url:'https://careers.salesforce.com/en/jobs/?search=account%20executive&location=Austin' },
+        { name:'LinkedIn — Account Executive (Austin)', tier:'', desc:'Turn on "Open to work" + alerts; filter Hybrid / On-site.', url:'https://www.linkedin.com/jobs/account-executive-jobs-austin-texas-metropolitan-area' },
+        { name:'Glassdoor / Wellfound', tier:'', desc:'SaaS AE + startup sales roles with salary insight.' }
+      ] },
+    sdr:{ label:'Sales Development', tagClass:'cat-b',
+      blurb:"The entry lane into tech sales. Built In Austin + Indeed carry the most hybrid Austin SDR/BDR roles, many Easy-Apply. Direct applications + referrals to SDR classes convert best.",
+      items:[
+        { name:'Built In Austin — Hybrid Sales', tier:'Tested ✓', desc:'Zello, ePayPolicy, LogicMonitor — all Hybrid Austin SDR/BDR, reposted within a day.', url:'https://www.builtinaustin.com/jobs/hybrid/sales' },
+        { name:'Indeed — Sales Development Rep (Austin)', tier:'Tested ✓', desc:'Live: LumenServe (Hybrid) $50–60k, TFLI $55–70k, Vivax $50–85k.', url:'https://www.indeed.com/jobs?q=sales+development+representative&l=Austin%2C+TX' },
+        { name:'LinkedIn — SDR (Austin)', tier:'', desc:'566+ SDR roles in the metro; keep a standing alert.', url:'https://www.linkedin.com/jobs/sales-development-representative-jobs-austin-texas-metropolitan-area' },
+        { name:'Target company sales orgs', tier:'', desc:'SailPoint, BigCommerce, Klaviyo, Cloudflare run SDR classes — apply direct + get referred.' }
+      ] },
+  },
+  footer:"<p><strong>How to read this:</strong> <em>Verified live</em> cards were opened and confirmed as active Austin postings on Jul 18, 2026. <em>Confirm scope</em> flags a role that doesn't fit the hybrid ask (e.g. fully remote). Salesforce is tagged as the <em>baseline</em> role to pattern-match against.</p><p style='margin-bottom:0'><strong>About the links:</strong> Individual job posts expire within days, so buttons open the evergreen <em>search</em> that surfaces each role — always current. Built In Austin and Salesforce links go direct.</p>"
+};
+
+/* ============================ PROFILE LOADING + AUTO-BUILD ============================ */
+function decodeProfile(){
+  const m = (location.hash||'').match(/[#&]p=([^&]+)/);
+  if(!m) return null;
+  try { return JSON.parse(decodeURIComponent(escape(atob(m[1])))); } catch(e){ return null; }
+}
+function searchUrls(title, loc){
+  const q=encodeURIComponent(title), l=encodeURIComponent(loc||'');
+  return { indeed:`https://www.indeed.com/jobs?q=${q}&l=${l}`, linkedin:`https://www.linkedin.com/jobs/search?keywords=${q}&location=${l}` };
+}
+// Turn a light admin-created brief {name, titles:[], location, mode, level, pay, avoid, buckets:[]} into a full profile.
+function buildFromBrief(b){
+  const cats = (b.buckets && b.buckets.length)
+    ? b.buckets.map((label,i)=>({ key:'c'+i, short:label, label, cls:i%2?'cat-b':'cat-a', color:i%2?'var(--catB)':'var(--catA)' }))
+    : [{ key:'c0', short:'Target', label:'Target Roles', cls:'cat-a', color:'var(--catA)' }];
+  const roles = (b.titles||[]).map((t,i)=>{
+    const u = searchUrls(t, b.location);
+    return { id:'t'+i, cat: cats[i % cats.length].key, title:t, company:'Live search', loc:b.location||'—',
+      schedule:[b.level,b.mode].filter(Boolean).join(' · ')||'—', pay:b.pay||'DOE', src:'Indeed · LinkedIn', url:u.indeed, search:true };
+  });
+  const items = (b.titles||[]).slice(0,6).map(t=>{ const u=searchUrls(t,b.location); return { name:'Indeed — '+t, tier:'Auto', desc:'Live '+t+' search for '+(b.location||'your area')+'.', url:u.indeed }; });
+  items.push({ name:'LinkedIn — search', tier:'', desc:'Set "Open to work" + a standing alert for these titles.', url:searchUrls((b.titles||['']).join(' '), b.location).linkedin });
+  if(/austin/i.test(b.location||'')) items.unshift({ name:'Built In Austin', tier:'Austin tech', desc:'Best for Austin startup/tech roles — filter by role + work mode.', url:'https://www.builtinaustin.com/jobs' });
+  return {
+    id:(b.name||'friend').toLowerCase().replace(/[^a-z0-9]+/g,'-'), mark:(b.name||'?').slice(0,1).toUpperCase(),
+    title:(b.name?b.name+"'s Roles":'Role Finder'), sub:(b.name||'')+" · candidate shortlist",
+    introTitle:'Are these the kinds of roles you want?',
+    introBody:"A starter shortlist built from your brief — target titles below each open a live "+(b.location||'')+" search. Hand-verified postings get added as they're found. Skim and tag each so we learn what fits.",
+    checkDate:null, categories:cats, roles, prefs:{ include:[b.titles&&b.titles.join(', '),b.location,b.mode,b.level,b.pay].filter(Boolean).join(' · '), exclude:b.avoid||'' },
+    sources:{ all:{ label:'How to find them', tagClass:'cat-a', blurb:'Auto-generated search links from your brief. Direct company career pages usually beat the boards — go there too.', items } },
+    footer:"<p><strong>Starter page.</strong> Titles link to live searches now; verified postings get added by hand. Tag roles to train the daily search.</p>"
+  };
+}
+const _p = decodeProfile();
+const ACTIVE = _p ? (_p.roles ? _p : buildFromBrief(_p)) : CARRIE;
+
+/* ============================ STATE ============================ */
+const CATS = {}; ACTIVE.categories.forEach(c=>CATS[c.key]=c);
+const ROLES = ACTIVE.roles;
+const SOURCES = ACTIVE.sources || {};
+const CHECK_DATE = ACTIVE.checkDate;
+const ROLLING = new Set((ACTIVE.rolling)||[]);
+const PID = ACTIVE.id || 'default';
+const K = s => `rf-${PID}-${s}`;
+const load = (k,d)=>{ try{ return JSON.parse(localStorage.getItem(k)||d); }catch(e){ return JSON.parse(d); } };
+let status = load(K('status'),'{}'), notes = load(K('notes'),'{}');
+let prefs = Object.assign({}, ACTIVE.prefs||{include:'',exclude:''}, load(K('prefs'),'{}'));
+let viewMode = localStorage.getItem(K('view')) || 'tiles';
+let filter='all', query='';
+const save = ()=>{ try{ localStorage.setItem(K('status'),JSON.stringify(status)); localStorage.setItem(K('notes'),JSON.stringify(notes)); localStorage.setItem(K('prefs'),JSON.stringify(prefs)); localStorage.setItem(K('view'),viewMode); }catch(e){} };
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const $ = id => document.getElementById(id);
+
+function relTime(iso){ const then=new Date(iso+'T00:00:00'),now=new Date(); const d=Math.round((now-then)/86400000);
+  if(d<=0)return'today'; if(d===1)return'yesterday'; if(d<7)return d+'d ago'; if(d<30)return Math.round(d/7)+'w ago'; if(d<365)return Math.round(d/30)+'mo ago'; return Math.round(d/365)+'y ago'; }
+function fmtDate(iso){ const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; const d=new Date(iso+'T00:00:00'); return M[d.getMonth()]+' '+d.getDate(); }
+function freshness(r){ if(r.posted)return{cls:'',text:'Posted '+relTime(r.posted)}; if(r.verified&&CHECK_DATE)return{cls:'',text:'Verified '+relTime(CHECK_DATE)}; if(r.search)return{cls:'rolling',text:'Live search'}; if(ROLLING.has(r.id))return{cls:'rolling',text:'Rolling / ongoing'}; return{cls:'unknown',text:'Date unknown'}; }
+
+const ICONS = {
+  loc:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  time:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  pay:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5a2.5 2 0 0 1 5 0c0 1.5-5 1-5 2.8a2.5 2 0 0 0 5 0"/></svg>'
+};
+
+/* ============================ HEADER / INTRO / FOOTER ============================ */
+$('brand-mark').textContent = ACTIVE.mark || 'RF';
+$('brand-title').textContent = ACTIVE.title || 'Role Finder';
+$('brand-sub').textContent = ACTIVE.sub || '';
+$('intro-title').textContent = ACTIVE.introTitle || 'Are these the kinds of roles you want?';
+$('intro-body').innerHTML = esc(ACTIVE.introBody||'').replace(/&lt;strong&gt;/g,'<strong>').replace(/&lt;\/strong&gt;/g,'</strong>');
+$('foot').innerHTML = ACTIVE.footer || '';
+document.title = (ACTIVE.title||'Role Finder');
+
+/* ============================ RENDER: STATS / CONTROLS ============================ */
+function renderStats(){
+  const tiles=[{k:'Candidate roles',v:ROLES.length}];
+  if(ROLES.some(r=>r.verified)) tiles.push({k:'Verified live'+(CHECK_DATE?' · '+fmtDate(CHECK_DATE):''),v:ROLES.filter(r=>r.verified).length});
+  ACTIVE.categories.forEach(c=>tiles.push({k:c.label,v:ROLES.filter(r=>r.cat===c.key).length}));
+  tiles.push({k:'Marked right fit',v:Object.values(status).filter(v=>v==='fit').length,accent:true});
+  $('stats').innerHTML = tiles.map(s=>`<div class="stat ${s.accent?'accent':''}"><div class="k">${esc(s.k)}</div><div class="v">${s.v}</div></div>`).join('');
+}
+function renderControls(){
+  const counts={all:ROLES.length,verified:ROLES.filter(r=>r.verified).length};
+  ACTIVE.categories.forEach(c=>counts[c.key]=ROLES.filter(r=>r.cat===c.key).length);
+  let chips=[{key:'all',label:'All roles',dot:null}];
+  if(counts.verified) chips.push({key:'verified',label:'Verified live',dot:'var(--good)'});
+  ACTIVE.categories.forEach(c=>chips.push({key:c.key,label:c.label,dot:c.color}));
+  const chipHtml=chips.map(c=>`<button class="chip" data-filter="${c.key}" aria-pressed="${filter===c.key}">${c.dot?`<span class="dot" style="background:${c.dot}"></span>`:''}${esc(c.label)}<span class="count">${counts[c.key]}</span></button>`).join('');
+  const seg=`<div class="viewseg" id="viewseg" role="group" aria-label="View mode">
+    <button data-vm="tiles" aria-pressed="${viewMode==='tiles'}" title="Card tiles">▦ Tiles</button>
+    <button data-vm="table" aria-pressed="${viewMode==='table'}" title="Compact table">☰ Table</button>
+    <button data-vm="excel" aria-pressed="${viewMode==='excel'}" title="Spreadsheet grid">▤ Excel</button></div>`;
+  $('controls').innerHTML = chipHtml + `<span class="spacer"></span>${seg}<input class="search" id="search" type="search" placeholder="Search roles…" value="${query.replace(/"/g,'&quot;')}" />`;
+  document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ filter=b.dataset.filter; renderControls(); renderGrid(); });
+  document.querySelectorAll('#viewseg button').forEach(b=>b.onclick=()=>{ viewMode=b.dataset.vm; save(); renderControls(); renderGrid(); });
+  $('search').oninput=e=>{ query=e.target.value; renderGrid(); };
+}
+
+/* ============================ RENDER: CARDS / TABLE / EXCEL ============================ */
+function card(r){
+  const st=status[r.id], c=CATS[r.cat]||{label:'',cls:'cat-a'}, fr=freshness(r);
+  const flags=[ r.verified?'<span class="flag flag-verified">Verified live</span>':'', r.example?'<span class="flag flag-example">Baseline</span>':'', r.scope?'<span class="flag flag-scope">Confirm scope</span>':'' ].join('');
+  const isSearch = r.url && (/jobs\?q=|jobs\/search|texas-metropolitan-area|builtinaustin/.test(r.url));
+  const linkBtn = r.url?`<a class="btn btn-link" href="${r.url}" target="_blank" rel="noopener">${isSearch?'Live search ↗':'View post ↗'}</a>`:'';
+  return `<article class="card ${st==='fit'?'done-fit':''} ${st==='pass'?'done-pass':''}" data-id="${r.id}">
+    <div class="card-head"><div style="flex:1">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span class="cat-tag ${c.cls}">${esc(c.label)}</span>${flags}</div>
+      <h3>${esc(r.title)}</h3><div class="company">${esc(r.company)}</div></div>
+      <span class="fresh ${fr.cls}" title="Posting freshness"><span class="fdot"></span>${fr.text}</span></div>
+    <div class="meta">
+      <span class="mk">${ICONS.loc}Location</span><span class="mv">${esc(r.loc)}${r.scope?` · <span style="color:var(--warn)">${esc(r.scope)}</span>`:''}</span>
+      <span class="mk">${ICONS.time}Schedule</span><span class="mv">${esc(r.schedule)}</span>
+      <span class="mk">${ICONS.pay}Pay</span><span class="mv pay">${esc(r.pay)}</span></div>
+    ${notes[r.id]?`<div class="note-pill ${st==='fit'?'fit':''}">✏️ ${esc(notes[r.id])}</div>`:''}
+    <div class="card-foot"><span class="src">${esc(r.src)}</span>${linkBtn}<span class="foot-spacer"></span>
+      <button class="btn btn-fit" data-id="${r.id}" data-act="fit" aria-pressed="${st==='fit'}">✓ Right fit</button>
+      <button class="btn btn-pass" data-id="${r.id}" data-act="pass" aria-pressed="${st==='pass'}">Not for me</button></div>
+  </article>`;
+}
+function rowCells(r){
+  const st=status[r.id], c=CATS[r.cat]||{short:'',cls:'cat-a'}, fr=freshness(r);
+  const roleCell=r.url?`<a href="${r.url}" target="_blank" rel="noopener" class="rrole">${esc(r.title)} ↗</a>`:`<span class="rrole">${esc(r.title)}</span>`;
+  const noteMark=notes[r.id]?` <span title="${esc(notes[r.id])}" style="cursor:help">✏️</span>`:'';
+  const tag=`<span class="rowacts"><button class="btn btn-fit" data-id="${r.id}" data-act="fit" aria-pressed="${st==='fit'}" title="Right fit">✓</button><button class="btn btn-pass" data-id="${r.id}" data-act="pass" aria-pressed="${st==='pass'}" title="Not for me">✕</button>${noteMark}</span>`;
+  return [`<span class="cat-tag ${c.cls}">${esc(c.short||c.label)}</span>`, roleCell, esc(r.company), esc(r.loc), esc(r.schedule), `<span class="pay">${esc(r.pay)}</span>`, esc(fr.text), esc(r.src), tag];
+}
+function renderTable(list){
+  const heads=['','Category','Role','Company','Location','Schedule','Pay','Posted','Source','Tag'];
+  const body=list.map(r=>{ const st=status[r.id],c=rowCells(r);
+    return `<tr><td><span class="stt ${st||''}"></span></td><td>${c[0]}</td><td class="wrap">${c[1]}</td><td>${c[2]}</td><td>${c[3]}</td><td>${c[4]}</td><td class="pay">${c[5]}</td><td>${c[6]}</td><td>${c[7]}</td><td>${c[8]}</td></tr>`; }).join('');
+  return `<div class="tbl-wrap"><table class="rtable"><thead><tr>${heads.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+function renderExcel(list){
+  const names=['#','Category','Role','Company','Location','Schedule','Pay','Posted','Source','Tag'];
+  const letters=['','A','B','C','D','E','F','G','H','I'];
+  const body=list.map((r,i)=>`<tr><td class="rownum">${i+1}</td>${rowCells(r).map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+  return `<div class="xl-wrap"><table class="xtable"><thead><tr class="colhead">${letters.map(l=>`<th class="${l===''?'rownum':''}">${l}</th>`).join('')}</tr><tr class="namehead">${names.map((n,i)=>`<th class="${i===0?'rownum':''}">${n}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+function wireActions(host){
+  host.querySelectorAll('.btn[data-act]').forEach(btn=>btn.onclick=()=>{ const id=btn.dataset.id,act=btn.dataset.act;
+    if(status[id]===act){ delete status[id]; delete notes[id]; save(); renderGrid(); renderStats(); renderSettings(); } else openModal(id,act); });
+}
+function renderGrid(){
+  const q=query.trim().toLowerCase();
+  const list=ROLES.filter(r=>(filter==='all'||(filter==='verified'?r.verified:r.cat===filter))).filter(r=>!q||(r.title+' '+r.company+' '+r.loc+' '+r.src).toLowerCase().includes(q));
+  const grid=$('grid'); grid.className=viewMode==='tiles'?'grid':'';
+  if(!list.length){ grid.innerHTML='<div class="empty">No roles match — try clearing the search or filter.</div>'; return; }
+  grid.innerHTML = viewMode==='table'?renderTable(list):viewMode==='excel'?renderExcel(list):list.map(card).join('');
+  wireActions(grid);
+}
+
+/* ============================ SOURCES ============================ */
+function renderSources(){
+  const panels=Object.values(SOURCES);
+  $('srcgrid').style.gridTemplateColumns = panels.length<2 ? '1fr' : '';
+  $('srcgrid').innerHTML = panels.map(s=>`<div class="panel"><div class="panel-head"><span class="cat-tag ${s.tagClass||'cat-a'}">${esc(s.label)}</span></div><p>${esc(s.blurb)}</p>${(s.items||[]).map((it,i)=>{ const tc=it.tier&&it.tier.indexOf('Tested')>-1?'tier tested':'tier'; const inner=`<div class="rank">${i+1}</div><div class="body"><div class="name">${esc(it.name)}${it.tier?`<span class="${tc}">${esc(it.tier)}</span>`:''}</div><div class="desc">${esc(it.desc)}</div></div>`; return it.url?`<a class="srcrow" href="${it.url}" target="_blank" rel="noopener">${inner}</a>`:`<div class="srcrow">${inner}</div>`; }).join('')}</div>`).join('');
+}
+
+/* ============================ MODAL ============================ */
+const REASONS={ pass:['Pay too low','Location / commute','Work mode (remote/hybrid)','Not the right level','Not the right role type','The company'], fit:['Great pay','Right role type','Right level','Good location','Right work mode','Loves the company'] };
+let modalState={id:null,act:null};
+function openModal(id,act){ const r=ROLES.find(x=>x.id===id); modalState={id,act}; const isPass=act==='pass';
+  const eb=$('modal-eyebrow'); eb.textContent=isPass?'✕ Not for me':'✓ Right fit'; eb.style.color=isPass?'var(--warn)':'var(--good)';
+  $('modal-title').textContent=r.title; $('modal-sub').textContent=r.company+' · '+r.loc;
+  $('modal-note-label').textContent=isPass?'What made this not a fit? — this trains the daily search':'What makes this a great fit? (optional — also trains the search)';
+  const note=$('modal-note'); note.value=notes[id]||'';
+  const wrap=$('modal-chips'); wrap.innerHTML=REASONS[act].map(x=>`<button class="rchip" type="button" aria-pressed="false">${x}</button>`).join('');
+  wrap.querySelectorAll('.rchip').forEach(ch=>{ if(note.value.split(' · ').includes(ch.textContent))ch.setAttribute('aria-pressed','true');
+    ch.onclick=()=>{ const on=ch.getAttribute('aria-pressed')==='true'; ch.setAttribute('aria-pressed',String(!on)); let parts=note.value.split(' · ').map(s=>s.trim()).filter(Boolean); const label=ch.textContent; if(!on){ if(!parts.includes(label))parts.push(label); } else parts=parts.filter(p=>p!==label); note.value=parts.join(' · '); }; });
+  $('overlay').hidden=false; note.focus(); }
+function closeModal(){ $('overlay').hidden=true; modalState={id:null,act:null}; }
+$('modal-cancel').onclick=closeModal;
+$('overlay').onclick=e=>{ if(e.target.id==='overlay')closeModal(); };
+$('modal-save').onclick=()=>{ const {id,act}=modalState; if(!id)return; status[id]=act; const v=$('modal-note').value.trim(); if(v)notes[id]=v; else delete notes[id]; save(); closeModal(); renderGrid(); renderStats(); renderSettings(); };
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('overlay').hidden)closeModal(); });
+
+/* ============================ SETTINGS ============================ */
+function renderSettings(){
+  $('pref-include').value=prefs.include||''; $('pref-exclude').value=prefs.exclude||'';
+  const build=(kind,title,empty)=>{ const items=ROLES.filter(r=>status[r.id]===kind); const head=`<h3>${title}<span class="cnt">${items.length}</span></h3>`;
+    if(!items.length)return head+`<div class="empty-s">${empty}</div>`;
+    return head+items.map(r=>`<div class="titem"><div class="th"><div><div class="tt">${esc(r.title)}</div><div class="tc">${esc(r.company)} · ${esc(r.loc)}</div></div><button class="rm" data-id="${r.id}">Remove</button></div><textarea data-note="${r.id}" rows="2" placeholder="${kind==='pass'?'Why it wasn’t a fit…':'Why it fits…'}">${esc(notes[r.id]||'')}</textarea></div>`).join(''); };
+  $('tlist-fit').innerHTML=build('fit','✓ Right for me','Tag roles “Right fit” and they collect here with notes.');
+  $('tlist-pass').innerHTML=build('pass','✕ Not for me','Tag roles “Not for me” and the reasons collect here.');
+  document.querySelectorAll('#view-settings .rm').forEach(b=>b.onclick=()=>{ const id=b.dataset.id; delete status[id]; delete notes[id]; save(); renderGrid(); renderStats(); renderSettings(); });
+  document.querySelectorAll('#view-settings textarea[data-note]').forEach(t=>t.oninput=()=>{ const id=t.dataset.note,v=t.value.trim(); if(v)notes[id]=v; else delete notes[id]; save(); });
+}
+$('pref-include').oninput=e=>{ prefs.include=e.target.value; save(); };
+$('pref-exclude').oninput=e=>{ prefs.exclude=e.target.value; save(); };
+
+/* ============================ TABS + INIT ============================ */
+function switchView(v){ document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.view===v))); ['roles','sources','settings'].forEach(n=>{ $('view-'+n).hidden=n!==v; }); const el=$('view-'+v); el.classList.remove('fade'); void el.offsetWidth; el.classList.add('fade'); }
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchView(t.dataset.view));
+renderStats(); renderControls(); renderGrid(); renderSources(); renderSettings();
+</script>

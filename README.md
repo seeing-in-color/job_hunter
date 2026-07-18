@@ -4,8 +4,15 @@ A tool to help find (and later, semi-automatically apply to) ideal job roles for
 First user: **Kingsley Cashion** — Austin, TX.
 
 ## Current status
-- **Scope (confirmed):** one person (Kingsley), **Austin metro only**, **find + track** for now (no auto-apply yet).
-- **Phase 2 deliverable is live:** `webapp/index.html` — a SaaS-style dashboard of candidate roles for Kingsley to confirm the right role *types*. Published as a shareable Artifact.
+- **Scope (confirmed):** find + track for now (no auto-apply yet).
+- **Now a multi-friend tool** with three parts:
+  - `admin/index.html` — **Admin HQ** (home base). Chat intake to add a friend → spins up a shareable Role Finder link (brief encoded in the URL `#p=` hash). Seeded with Kingsley + Carrie.
+  - `finder/index.html` — **profile-driven Role Finder engine**. Defaults to **Carrie** (Austin tech-sales, AE + SDR/BDR, hybrid). Reads a `#p=<base64 brief>` to render any friend; auto-generates live-search cards from a brief when no verified roles exist yet.
+  - `webapp/index.html` — **Kingsley's** bespoke Role Finder (household/family + organizing).
+
+### People
+- **Kingsley** — Austin; household & family + professional organizing. Bespoke page (`webapp/`).
+- **Carrie** — Austin, **hybrid (≥2 days in-office, no full remote)**; tech/SaaS sales, mix of SDR/BDR → AE, Salesforce/SaaS baseline. Engine default (`finder/`). Verified-live employers 2026-07-18: Amazon Business (Hybrid AE $69–121k), Toshiba (Sr AE), AlertMedia, recruitAbility; Zello, LumenServe, ePayPolicy, LogicMonitor, TFLI, Vivax (SDR/BDR). Top source: **Built In Austin — Hybrid Sales**.
 
 ## Target profile — Kingsley
 Two role directions, both in Austin:
