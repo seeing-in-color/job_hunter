@@ -20,3 +20,4 @@ dist/
 # Never commit application credentials
 secrets*
 *.secret
+.vercel

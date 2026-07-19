@@ -197,6 +197,41 @@
 
   footer.foot{ border-top:1px solid var(--border); padding:22px 0 40px; color:var(--muted); font-size:12.5px; }
   footer.foot strong{ color:var(--ink-soft); font-weight:600; }
+  /* Fit score */
+  .score{ display:inline-flex; align-items:center; gap:5px; font-size:13px; font-weight:750; padding:3px 9px; border-radius:999px; font-variant-numeric:tabular-nums; border:1px solid transparent; cursor:help; white-space:nowrap; }
+  .score .lbl{ font-size:8.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; opacity:.7; }
+  .score.s-hi{ background:var(--good-soft); color:var(--good); border-color:color-mix(in srgb,var(--good) 30%,transparent); }
+  .score.s-lo{ background:var(--surface-2); color:var(--muted); border-color:var(--border); }
+  .score.s-mid{ background:#F3E7CF; color:#87692B; border-color:#E6D3A8; }
+  @media (prefers-color-scheme:dark){ .score.s-mid{ background:#332B18; color:#E6C169; border-color:#4A3E20; } }
+  :root[data-theme="dark"] .score.s-mid{ background:#332B18; color:#E6C169; border-color:#4A3E20; }
+  :root[data-theme="light"] .score.s-mid{ background:#F3E7CF; color:#87692B; border-color:#E6D3A8; }
+  .rtable .score, .xtable .score{ font-size:12px; padding:2px 7px; }
+  .sortsel{ font-family:inherit; font-size:13px; color:var(--ink); background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:7px 12px; cursor:pointer; }
+  .sortsel:focus{ outline:none; border-color:var(--accent); }
+  .ctl-lbl{ font-size:11px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.05em; margin-left:4px; }
+
+  /* Outreach + word-of-mouth */
+  .sec-title{ font-size:12px; font-weight:650; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:22px 0 2px; }
+  .oc-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; padding:14px 0 6px; }
+  @media (max-width:720px){ .oc-grid{ grid-template-columns:1fr; } }
+  .oc{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:10px; }
+  .oc .ohead{ display:flex; align-items:center; gap:8px; }
+  .oc .on{ font-weight:650; font-size:15px; letter-spacing:-.01em; }
+  .oc .ot{ font-size:11px; color:var(--muted); font-weight:600; }
+  .oc .hiring{ font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--good); background:var(--good-soft); padding:3px 7px; border-radius:6px; margin-left:auto; }
+  .oc .onote{ font-size:13px; color:var(--ink-soft); flex:1; }
+  .oc .orow{ display:flex; gap:7px; flex-wrap:wrap; padding-top:10px; border-top:1px solid var(--border); }
+  .obtn{ font-family:inherit; cursor:pointer; font-size:12px; font-weight:600; border-radius:8px; padding:6px 10px; border:1px solid var(--border-strong); background:var(--surface); color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:5px; transition:all .14s; }
+  .obtn:hover{ color:var(--accent); border-color:var(--accent); }
+  .wom{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:6px 0 40px; }
+  @media (max-width:720px){ .wom{ grid-template-columns:1fr; } }
+  .wom a{ display:block; text-decoration:none; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px; box-shadow:var(--shadow); color:inherit; transition:border-color .14s,transform .14s; }
+  .wom a:hover{ border-color:var(--accent); transform:translateY(-2px); }
+  .wom .wn{ font-weight:600; font-size:14px; } .wom .wn::after{ content:" ↗"; color:var(--muted); }
+  .wom .wp{ font-size:10.5px; color:var(--accent); font-weight:650; text-transform:uppercase; letter-spacing:.03em; margin-top:2px; }
+  .wom .wnote{ font-size:12.5px; color:var(--ink-soft); margin-top:5px; }
+
   @media (prefers-reduced-motion:reduce){ *,.modal{ animation:none!important; transition:none!important; } }
   .fade{ animation:fade .4s ease both; } @keyframes fade{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
 </style>
@@ -220,6 +255,7 @@
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" aria-selected="true" data-view="roles">Candidate roles</button>
     <button class="tab" role="tab" aria-selected="false" data-view="sources">Where to find them</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="outreach" id="tab-outreach" hidden>Outreach &amp; network</button>
     <button class="tab" role="tab" aria-selected="false" data-view="settings">Settings &amp; training</button>
   </div>
   <section id="view-roles">
@@ -227,6 +263,7 @@
     <div class="grid" id="grid"></div>
   </section>
   <section id="view-sources" hidden><div class="src-grid" id="srcgrid"></div></section>
+  <section id="view-outreach" hidden><div id="outreach-body"></div></section>
   <section id="view-settings" hidden>
     <div class="settings">
       <div class="prefs">
@@ -267,21 +304,23 @@ const CARRIE = {
     include:"Austin-based tech / SaaS sales roles, HYBRID (≥2 days in-office) or on-site — no full remote. Mix of levels: SDR / BDR through Account Executive. Salesforce / SaaS / B2B software as the baseline. Base+OTE meaningful (SDR ~$55k+, AE ~$110k+).",
     exclude:"Fully-remote roles. Outside Austin metro. Commission-only door-to-door / retail / auto-dealer / insurance-churn roles. Roles with no base salary."
   },
+  // Each role links to the SPECIFIC live post. score 1–10 = fit vs Carrie's ideal (Austin, hybrid ≥2 days, SaaS/tech sales, mix levels, good base+OTE).
   roles:[
-    // ---- Account Executive (verified live 2026-07-18) ----
-    { id:'r1', cat:'ae', title:'Account Executive, Commercial (Hospitality)', company:'Amazon Business', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'$69k–121k', src:'Indeed', url:'https://www.indeed.com/jobs?q=account+executive&l=Austin%2C+TX', verified:true },
-    { id:'r2', cat:'ae', title:'Senior Account Executive', company:'Toshiba America Business Solutions', loc:'Austin, TX', schedule:'Full-time · On-site', pay:'$45k–100k', src:'Indeed', url:'https://www.indeed.com/jobs?q=account+executive&l=Austin%2C+TX', verified:true },
-    { id:'r3', cat:'ae', title:'Sales Manager, Mid-Market', company:'AlertMedia', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'DOE', src:'Built In Austin', url:'https://www.builtinaustin.com/jobs/hybrid/sales', verified:true },
-    { id:'r4', cat:'ae', title:'Mid-Market SaaS Account Executive', company:'Zoho', loc:'Austin, TX', schedule:'Full-time · Hybrid (3 days/wk)', pay:'~$120k base', src:'Indeed · company site', url:'https://www.indeed.com/jobs?q=account+executive+SaaS&l=Austin%2C+TX' },
-    { id:'r5', cat:'ae', title:'Enterprise Account Executive', company:'Salesforce', loc:'Austin, TX', schedule:'Full-time · Office-flexible', pay:'$123k–248k OTE', src:'Salesforce Careers', url:'https://careers.salesforce.com/en/jobs/?search=account%20executive&location=Austin', example:true },
-    { id:'r6', cat:'ae', title:'Mid-Market Account Executive', company:'recruitAbility (agency)', loc:'Austin, TX', schedule:'Full-time · Remote-in-Austin', pay:'$110k–130k', src:'Indeed', url:'https://www.indeed.com/jobs?q=account+executive&l=Austin%2C+TX', verified:true, scope:'Remote — Carrie wants ≥2 days in-office' },
-    // ---- Sales Development (verified live 2026-07-18) ----
-    { id:'r7', cat:'sdr', title:'Sales Development Representative', company:'Zello', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'DOE', src:'Built In Austin', url:'https://www.builtinaustin.com/jobs/hybrid/sales', verified:true },
-    { id:'r8', cat:'sdr', title:'Business Development Representative', company:'LumenServe', loc:'Austin, TX 78741', schedule:'Full-time · Hybrid', pay:'$50k–60k', src:'Indeed', url:'https://www.indeed.com/jobs?q=sales+development+representative&l=Austin%2C+TX', verified:true },
-    { id:'r9', cat:'sdr', title:'Enterprise Business Development Representative', company:'ePayPolicy', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'DOE', src:'Built In Austin', url:'https://www.builtinaustin.com/jobs/hybrid/sales', verified:true },
-    { id:'r10', cat:'sdr', title:'Business Development Representative', company:'LogicMonitor', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'DOE', src:'Built In Austin', url:'https://www.builtinaustin.com/jobs/hybrid/sales', verified:true },
-    { id:'r11', cat:'sdr', title:'Business Development Representative', company:'TFLI Limited', loc:'Austin, TX 78701 (Downtown)', schedule:'Full-time · On-site', pay:'$55k–70k', src:'Indeed', url:'https://www.indeed.com/jobs?q=sales+development+representative&l=Austin%2C+TX', verified:true },
-    { id:'r12', cat:'sdr', title:'Entry-Level Sales Development Representative', company:'Vivax Pros', loc:'Austin, TX 78702', schedule:'Full-time · On-site', pay:'$50k–85k', src:'Indeed', url:'https://www.indeed.com/jobs?q=sales+development+representative&l=Austin%2C+TX', verified:true }
+    // ---- Sales Development (SDR / BDR) ----
+    { id:'r1', cat:'sdr', title:'Sales Development Representative, Enterprise', company:'Rippling', loc:'Austin, TX 78701', schedule:'Full-time · Hybrid', pay:'$99k OTE', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=fbcfbbd3816a438d', verified:true, score:10, scoreWhy:'Top-tier SaaS brand, hybrid downtown Austin, strong OTE — bullseye for the SDR track.' },
+    { id:'r2', cat:'sdr', title:'Business Development Representative', company:'Aprio', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'$85k–110k', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=2c7f3a446eb5740f', verified:true, score:9, scoreWhy:'Hybrid Austin, unusually high BDR pay band; advisory-tech sales.' },
+    { id:'r3', cat:'sdr', title:'Sales Development Representative', company:'NinjaOne', loc:'Austin, TX 78701', schedule:'Full-time · Hybrid', pay:'DOE', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=adef250cb809d4ae', verified:true, score:9, scoreWhy:'Fast-growing SaaS (IT management), hybrid downtown — ideal SDR launchpad.' },
+    { id:'r4', cat:'sdr', title:'Sales Development Representative', company:'Zello', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'DOE', src:'Built In Austin', url:'https://www.builtinaustin.com/job/sales-development-representative/9850074', verified:true, score:8, scoreWhy:'Austin SaaS, hybrid; pay not listed so slightly below the priced roles.' },
+    { id:'r5', cat:'sdr', title:'Enterprise Business Development Representative', company:'ePayPolicy', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'DOE', src:'Built In Austin', url:'https://www.builtinaustin.com/job/enterprise-business-development-representative/10161685', verified:true, score:8, scoreWhy:'Austin fintech SaaS, hybrid, enterprise segment — great résumé builder.' },
+    { id:'r6', cat:'sdr', title:'Business Development Representative', company:'LogicMonitor', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'DOE', src:'Built In Austin', url:'https://www.builtinaustin.com/job/business-development-representative/9813307', verified:true, score:8, scoreWhy:'Established observability SaaS, hybrid Austin.' },
+    { id:'r7', cat:'sdr', title:'Business Development Representative', company:'LumenServe', loc:'Austin, TX 78741', schedule:'Full-time · Hybrid', pay:'$50k–60k', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=f1106ffe34a46b15', verified:true, score:6, scoreWhy:'Hybrid Austin fits, but smaller shop and lower comp band.' },
+    { id:'r8', cat:'sdr', title:'Entry-Level Sales Development Representative', company:'Vivax Pros', loc:'Austin, TX 78702', schedule:'Full-time · On-site', pay:'$50k–85k', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=921bd5b3abd77572', verified:true, score:4, scoreWhy:'In-home/home-improvement sales, not SaaS/tech — off-baseline despite the pay.', scope:'In-home sales, not SaaS' },
+    // ---- Account Executive (closing) ----
+    { id:'r9', cat:'ae', title:'Account Executive, Commercial — Hospitality', company:'Amazon Business', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'$69k–121k', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=fbfa514a62995a24', verified:true, score:8, scoreWhy:'Hybrid Austin, real closing AE seat at a top employer; B2B (not pure SaaS).' },
+    { id:'r10', cat:'ae', title:'Associate Account Executive, Enterprise', company:'AWS', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'DOE', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=ae77fa750e382c80', verified:true, score:8, scoreWhy:'Entry-to-mid AE at AWS — tech sales, strong brand, fits the "mix of levels" ask.' },
+    { id:'r11', cat:'ae', title:'Sales Manager, Mid-Market', company:'AlertMedia', loc:'Austin, TX', schedule:'Full-time · Hybrid', pay:'DOE', src:'Built In Austin', url:'https://www.builtinaustin.com/job/sales-manager-mid-market/9571945', verified:true, score:7, scoreWhy:'Austin SaaS, hybrid; a manager seat (not IC rep) so slightly off the target level.' },
+    { id:'r12', cat:'ae', title:'Account Executive, Healthcare', company:'Amazon Business', loc:'Austin, TX', schedule:'Full-time', pay:'$69k–121k', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=95bc87f20e3a443b', verified:true, score:7, scoreWhy:'Closing AE at Amazon Business; work-mode not called hybrid on this post.' },
+    { id:'r13', cat:'ae', title:'Sales Executive — Microsoft Practice', company:'Deloitte', loc:'Austin, TX', schedule:'Full-time', pay:'DOE', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=d8ac6cbc413e3cdb', verified:true, score:6, scoreWhy:'Enterprise tech sales, but consulting-flavored and senior — reach role.' }
   ],
   sources:{
     ae:{ label:'Account Executive', tagClass:'cat-a',
@@ -302,7 +341,89 @@ const CARRIE = {
         { name:'Target company sales orgs', tier:'', desc:'SailPoint, BigCommerce, Klaviyo, Cloudflare run SDR classes — apply direct + get referred.' }
       ] },
   },
-  footer:"<p><strong>How to read this:</strong> <em>Verified live</em> cards were opened and confirmed as active Austin postings on Jul 18, 2026. <em>Confirm scope</em> flags a role that doesn't fit the hybrid ask (e.g. fully remote). Salesforce is tagged as the <em>baseline</em> role to pattern-match against.</p><p style='margin-bottom:0'><strong>About the links:</strong> Individual job posts expire within days, so buttons open the evergreen <em>search</em> that surfaces each role — always current. Built In Austin and Salesforce links go direct.</p>"
+  outreach:[
+    { name:'Rippling', type:'SaaS · HR/IT', url:'https://www.rippling.com/careers', note:'Referrals convert best — find an Austin Rippling SDR on LinkedIn and ask for a quick intro.', hiring:true },
+    { name:'NinjaOne', type:'SaaS · IT management', url:'https://www.ninjaone.com/careers/', note:'Fast-growing Austin sales org; apply direct and connect with the recruiter.', hiring:true },
+    { name:'ePayPolicy', type:'Fintech SaaS', url:'https://www.epaypolicy.com/careers/', note:'Austin HQ, small enough that a warm, specific note stands out.', hiring:true },
+    { name:'LogicMonitor', type:'Observability SaaS', url:'https://www.logicmonitor.com/careers', note:'Austin office; SDR classes hire in cohorts — time it.', hiring:true },
+    { name:'SailPoint', type:'Security SaaS', url:'https://www.sailpoint.com/company/careers/', note:'Austin-HQ; well-known SDR feeder program.' },
+    { name:'BigCommerce', type:'E-commerce SaaS', url:'https://careers.bigcommerce.com/careers/', note:'Austin-HQ; strong, structured sales org.' }
+  ],
+  wordofmouth:[
+    { name:'Built In Austin — Sales', platform:'Job community', url:'https://www.builtinaustin.com/jobs/hybrid/sales', note:'The most current hybrid Austin tech-sales feed — check weekly.' },
+    { name:'RepVue', platform:'Sales intel', url:'https://www.repvue.com/', note:'Rank & compare SaaS sales orgs by real OTE attainment before you apply.' },
+    { name:'Pavilion', platform:'GTM community', url:'https://www.joinpavilion.com/', note:'Sales community with an Austin chapter — referrals + unlisted role leads.' },
+    { name:'LinkedIn — Open to Work', platform:'LinkedIn', url:'https://www.linkedin.com/jobs/account-executive-jobs-austin-texas-metropolitan-area', note:'Turn on Open-to-Work + alerts; DM SDR managers at target companies directly.' }
+  ],
+  footer:"<p><strong>How to read this:</strong> every card links to a <em>specific live post</em> (opened & confirmed Jul 18, 2026), sorted by <em>fit score</em> — how well it matches Carrie's ideal (Austin, hybrid, SaaS/tech sales, mix of levels, solid OTE). Hover a score to see why. <em>Confirm scope</em> flags an off-baseline role.</p><p style='margin-bottom:0'><strong>Heads up:</strong> individual Indeed/LinkedIn posts expire within days — if a link 404s, the same role is usually still findable via the searches on the <em>Where to find them</em> tab.</p>"
+};
+
+/* ============================ BUILT-IN PROFILE: KINGSLEY ============================ */
+const KINGSLEY = {
+  id:'kingsley', mark:'K', title:'Austin Household & Organizing Roles', sub:"Kingsley's job hunt · candidate shortlist",
+  introTitle:'Are these the kinds of roles you want?',
+  introBody:"Live Austin openings across the two directions we mapped — household & family roles (nanny, family assistant, house / household / estate manager) and professional organizing — each linking to the specific post and sorted by fit score. Skim and tag each so we know what to chase.",
+  checkDate:'2026-07-18',
+  categories:[
+    { key:'hh',  short:'Household',  label:'Household & Family',      cls:'cat-a', color:'var(--catA)' },
+    { key:'org', short:'Organizing', label:'Professional Organizing', cls:'cat-b', color:'var(--catB)' }
+  ],
+  prefs:{
+    include:"Austin metro. Household & family roles (nanny, family assistant, house / household / estate manager) and professional organizing. Long-term / full-time preferred. Pay ideally $28/hr+ or salaried.",
+    exclude:"Senior / elder home-care & caregiver agency roles. Commercial / HOA property management. Non-Austin (travel / live-in or San Antonio) unless flagged OK. No base / commission-only."
+  },
+  roles:[
+    // ---- Household & Family ----
+    { id:'r1', cat:'hh', title:'Household Manager / Nanny', company:'A Perfect Fit Nanny Agency', loc:'Austin, TX 78723 (Windsor Park)', schedule:'Full-time, long-term', pay:'$32–37/hr', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=4611aaa4912bb45e', verified:true, score:9, scoreWhy:'Exact target — household manager + nanny blend, Austin, strong hourly.' },
+    { id:'r2', cat:'hh', title:'House Manager & Family Assistant (light meal prep)', company:'Sage Haus', loc:'Austin, TX', schedule:'Part-time · evenings as needed', pay:'$30/hr', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=d62ceefd28b10c3a', verified:true, score:9, scoreWhy:'Sage Haus specializes in exactly these roles; on-target duties + pay.' },
+    { id:'r3', cat:'hh', title:'House Manager', company:'Sage Haus', loc:'Austin, TX', schedule:'Part-time · 25–30 hr', pay:'$28–34/hr', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=6f4857ff3782c397', verified:true, score:9, scoreWhy:'Core house-manager role, building systems from scratch, good hourly.' },
+    { id:'r4', cat:'hh', title:'Part-Time House Manager & Family Assistant', company:'Sage Haus', loc:'Austin, TX', schedule:'Part-time', pay:'$33–37/hr', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=0a07f5e73b266f0f', verified:true, score:9, scoreWhy:'Highest hourly of the set; direct family-assistant / house-manager match.' },
+    { id:'r5', cat:'hh', title:'Full-Time Nanny — active family', company:'The Nanny League', loc:'Austin, TX 78660', schedule:'Full-time', pay:'$35–40/hr', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=d2358fd49b401fd5', verified:true, score:8, scoreWhy:'Top nanny pay in market; full-time, long-term.' },
+    { id:'r6', cat:'hh', title:'Household Assistant & Childcare Support', company:'Sage Haus', loc:'Austin, TX', schedule:'Part-time · 10–15 hr · Mon–Fri', pay:'$28–32/hr', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=318ffeea82c6fcf5', verified:true, score:8, scoreWhy:'Household + childcare blend; lighter hours.' },
+    { id:'r7', cat:'hh', title:'Executive Estate Manager', company:'Sage Haus', loc:'Bee Cave, TX', schedule:'Full-time', pay:'$120k+/yr', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=401daec8d6469054', verified:true, score:8, scoreWhy:'Highest-comp path (estate manager); Bee Cave commute is the only knock.' },
+    { id:'r8', cat:'hh', title:'Personal Assistant / Household Manager', company:'MOD Assistants', loc:'Austin, TX 78701 (Downtown)', schedule:'Full-time', pay:'$24/hr', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=ce1c49e1125ed8e0', verified:true, score:7, scoreWhy:'On-target role, but lowest hourly of the household set.' },
+    { id:'r9', cat:'hh', title:'Full-Time Nanny (Bee Cave)', company:'That Nanny Place', loc:'Austin, TX · Bee Cave', schedule:'Full-time', pay:'$26–30/hr', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=af86e28e45478737', verified:true, score:7, scoreWhy:'Solid full-time nanny role; mid pay, some commute.' },
+    { id:'r10', cat:'hh', title:'Part-Time Nanny (78746)', company:'First Choice Nannies', loc:'Rollingwood / Austin 78746', schedule:'Part-time', pay:'$35–40/hr', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=3717cd9ba471663f', verified:true, score:6, scoreWhy:'Great hourly but part-time only.' },
+    // ---- Professional Organizing ----
+    { id:'r11', cat:'org', title:'Lead Organizer', company:'Graceful Spaces', loc:'Austin, TX', schedule:'Mon–Fri, 7a–6p projects', pay:'DOE', src:'Direct site', url:'https://graceful-spaces.com/careers', verified:true, score:9, scoreWhy:'Your example company; hands-on lead role with a clear growth path.' },
+    { id:'r12', cat:'org', title:'Home Organizer & Laundry Specialist', company:'The Cesta', loc:'Austin, TX 78701 (Downtown)', schedule:'Part-time · flexible', pay:'$25–30/hr', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=d06d7e8007fb4379', verified:true, score:8, scoreWhy:'Downtown organizing role, replies fast, decent hourly.' },
+    { id:'r13', cat:'org', title:'Project Lead — Organizing', company:'Graceful Spaces', loc:'Austin, TX', schedule:'Mon–Fri, 7a–7p availability', pay:'DOE', src:'Direct site', url:'https://graceful-spaces.com/careers', verified:true, score:8, scoreWhy:'Highest-level organizing leadership; broader availability required.' },
+    { id:'r14', cat:'org', title:'Professional Organizer (Support / Associate)', company:'Graceful Spaces', loc:'Austin, TX', schedule:'Flexible, 22+ hrs · Mon–Thu', pay:'DOE', src:'Direct site', url:'https://graceful-spaces.com/careers', verified:true, score:8, scoreWhy:'Entry into organizing with growth; flexible hours.' },
+    { id:'r15', cat:'org', title:'Home Organizer (Lakeway)', company:'The Cesta', loc:'Lakeway, TX', schedule:'Part-time · on-call', pay:'from $22/hr', src:'Indeed', url:'https://www.indeed.com/viewjob?jk=0a8e5377367bcc0e', verified:true, score:6, scoreWhy:'Same company, but Lakeway commute + lower starting rate.' }
+  ],
+  sources:{
+    hh:{ label:'Household & Family', tagClass:'cat-a',
+      blurb:"Best signal from specialized staffing agencies (they place directly), then Indeed. Sage Haus is hiring heavily right now — worth a direct application beyond the specific posts.",
+      items:[
+        { name:'Indeed — household manager (Austin)', tier:'Tested ✓', desc:'Sage Haus has 6+ live roles ($28–37/hr + a $120k estate manager); A Perfect Fit $32–37.', url:'https://www.indeed.com/jobs?q=household+manager&l=Austin%2C+TX' },
+        { name:'Indeed — nanny / family assistant (Austin)', tier:'Tested ✓', desc:'The Nanny League $35–40, First Choice Nannies, That Nanny Place.', url:'https://www.indeed.com/jobs?q=nanny+family+assistant&l=Austin%2C+TX' },
+        { name:'Household staffing agencies', tier:'Highest signal', desc:'Moms Best Friend, Seaside, A Perfect Fit, Nanny & Butler, BAHS — one intake → ongoing matches.', url:'https://www.momsbestfriend.com/austin/candidate-application/' },
+        { name:'LinkedIn — household manager (Austin)', tier:'', desc:'Best for manager-level; evergreen search + alerts.', url:'https://www.linkedin.com/jobs/household-manager-jobs-austin-texas-metropolitan-area' }
+      ] },
+    org:{ label:'Professional Organizing', tagClass:'cat-b',
+      blurb:"Organizing barely lives on job boards — companies hire off their own sites + Instagram. The Outreach tab has a ready cold-outreach list with emails. Go direct.",
+      items:[
+        { name:'Graceful Spaces — careers', tier:'Tested ✓', desc:'3 live Austin roles (Project Lead, Lead Organizer, Organizer).', url:'https://graceful-spaces.com/careers' },
+        { name:'Indeed — professional organizer (Austin)', tier:'Tested ✓', desc:'The Cesta $22–30/hr (replies in ~1 day).', url:'https://www.indeed.com/jobs?q=professional+organizer&l=Austin%2C+TX' },
+        { name:'NAPO Austin — Find A Pro', tier:'Directory', desc:'38+ member studios — the master list to approach directly.', url:'https://www.napoaustin.com/Find_A_Pro' },
+        { name:'Instagram', tier:'', desc:'Studios post "we\'re hiring" to Stories first — follow + DM (see Outreach tab).' }
+      ] },
+  },
+  outreach:[
+    { name:'Graceful Spaces', type:'Organizing · your example', url:'https://graceful-spaces.com/careers', note:'3 roles open — apply via their careers form; strongest direct target.', hiring:true },
+    { name:'Moxie Space', type:'Organizing studio', url:'https://moxiespace.com/become-an-organizer/', email:'contact@moxiespace.com', phone:'(512) 805-5582', note:'Has a "Become an Organizer" page — actively hiring. Warm email + apply.', hiring:true },
+    { name:'Austin Organizers', type:'Organizing studio', url:'https://www.austinorganizers.com/apply.html', ig:'austinorganizers', phone:'360-936-8742', note:'Has an /apply page — they recruit organizers. Apply direct.', hiring:true },
+    { name:'The Cesta', type:'Organizing studio', url:'https://www.indeed.com/viewjob?jk=d06d7e8007fb4379', note:'Home Organizer + Lakeway roles live on Indeed; replies within ~1 day.', hiring:true },
+    { name:'B. Moore Organized', type:'Organizing + moving', url:'https://www.bmooreorganized.com/inquire', email:'Hello@bmooreorganized.com', ig:'bmooreorganized', phone:'(512) 756-3139', note:'No public posting — follow on IG, then a short intro + availability email.' },
+    { name:'NEAT Method Austin', type:'National franchise', url:'https://neatmethod.com/', note:'Brand with an Austin studio; inquire via site + Instagram.' }
+  ],
+  wordofmouth:[
+    { name:'Austin, TX Babysitter/Nanny Job Board', platform:'Facebook group', url:'https://www.facebook.com/groups/2367349053584559/', note:'Families post nanny / family-assistant gigs directly — join + check daily.' },
+    { name:'Austin Nanny Job Board', platform:'Facebook group', url:'https://www.facebook.com/groups/4272803021/', note:'Active family-posted nanny roles.' },
+    { name:'AUSTIN Child Care, Nannies and Families', platform:'Facebook group', url:'https://www.facebook.com/groups/1036290210178536/', note:'Word-of-mouth family + household postings.' },
+    { name:'NAPO Austin — Find A Pro', platform:'Organizing network', url:'https://www.napoaustin.com/Find_A_Pro', note:'Directory of every Austin organizing pro/studio — approach for openings.' }
+  ],
+  footer:"<p><strong>How to read this:</strong> every card links to a <em>specific live post</em> (opened & confirmed Jul 18, 2026), sorted by <em>fit score</em> vs Kingsley's ideal. Organizing roles mostly hire off-board — the <em>Outreach</em> tab has emails / IG / phone for cold outreach.</p><p style='margin-bottom:0'><strong>Heads up:</strong> individual job posts expire within days — if a link 404s, the same role is usually still findable via the searches on the <em>Where to find them</em> tab.</p>"
 };
 
 /* ============================ PROFILE LOADING + AUTO-BUILD ============================ */
@@ -338,8 +459,10 @@ function buildFromBrief(b){
     footer:"<p><strong>Starter page.</strong> Titles link to live searches now; verified postings get added by hand. Tag roles to train the daily search.</p>"
   };
 }
+const BUILTIN = { carrie:CARRIE, kingsley:KINGSLEY };
+function builtinFromHash(){ const h=(location.hash||'').replace(/^#/,'').trim().toLowerCase(); return BUILTIN[h]||null; }
 const _p = decodeProfile();
-const ACTIVE = _p ? (_p.roles ? _p : buildFromBrief(_p)) : CARRIE;
+const ACTIVE = _p ? (_p.roles ? _p : buildFromBrief(_p)) : (builtinFromHash() || CARRIE);
 
 /* ============================ STATE ============================ */
 const CATS = {}; ACTIVE.categories.forEach(c=>CATS[c.key]=c);
@@ -353,8 +476,23 @@ const load = (k,d)=>{ try{ return JSON.parse(localStorage.getItem(k)||d); }catch
 let status = load(K('status'),'{}'), notes = load(K('notes'),'{}');
 let prefs = Object.assign({}, ACTIVE.prefs||{include:'',exclude:''}, load(K('prefs'),'{}'));
 let viewMode = localStorage.getItem(K('view')) || 'tiles';
+const HAS_SCORES = ROLES.some(r=>typeof r.score==='number');
+let sortBy = localStorage.getItem(K('sort')) || (HAS_SCORES?'score':'default');
+let minScore = +(localStorage.getItem(K('minscore'))||0);
 let filter='all', query='';
-const save = ()=>{ try{ localStorage.setItem(K('status'),JSON.stringify(status)); localStorage.setItem(K('notes'),JSON.stringify(notes)); localStorage.setItem(K('prefs'),JSON.stringify(prefs)); localStorage.setItem(K('view'),viewMode); }catch(e){} };
+const save = ()=>{ try{ localStorage.setItem(K('status'),JSON.stringify(status)); localStorage.setItem(K('notes'),JSON.stringify(notes)); localStorage.setItem(K('prefs'),JSON.stringify(prefs)); localStorage.setItem(K('view'),viewMode); localStorage.setItem(K('sort'),sortBy); localStorage.setItem(K('minscore'),String(minScore)); }catch(e){} };
+function scoreBand(n){ return n>=8?'s-hi':n>=6?'s-mid':'s-lo'; }
+function scoreBadge(r){ return typeof r.score==='number'?`<span class="score ${scoreBand(r.score)}" title="Fit ${r.score}/10 — ${esc(r.scoreWhy||'')}"><span class="lbl">Fit</span>${r.score}</span>`:''; }
+function payNum(p){ const s=String(p||''); const nums=(s.match(/[\d.]+/g)||[]).map(Number).filter(n=>n>0); if(!nums.length) return -1; let v=Math.max(...nums); if(/k/i.test(s)&&v<1000) v*=1000; if(/hr|hour|\/h/i.test(s)&&v<200) v*=2080; return v; }
+function freshRank(r){ if(r.posted) return 3; if(r.verified) return 2; if(r.search||ROLLING.has(r.id)) return 1; return 0; }
+function sortList(list){
+  const a=list.slice();
+  if(sortBy==='score') a.sort((x,y)=>(y.score??-1)-(x.score??-1));
+  else if(sortBy==='pay') a.sort((x,y)=>payNum(y.pay)-payNum(x.pay));
+  else if(sortBy==='fresh') a.sort((x,y)=>freshRank(y)-freshRank(x));
+  else if(sortBy==='az') a.sort((x,y)=>x.title.localeCompare(y.title));
+  return a;
+}
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const $ = id => document.getElementById(id);
 
@@ -381,6 +519,7 @@ document.title = (ACTIVE.title||'Role Finder');
 /* ============================ RENDER: STATS / CONTROLS ============================ */
 function renderStats(){
   const tiles=[{k:'Candidate roles',v:ROLES.length}];
+  if(HAS_SCORES) tiles.push({k:'Top-fit (8+)',v:ROLES.filter(r=>(r.score||0)>=8).length,accent:true});
   if(ROLES.some(r=>r.verified)) tiles.push({k:'Verified live'+(CHECK_DATE?' · '+fmtDate(CHECK_DATE):''),v:ROLES.filter(r=>r.verified).length});
   ACTIVE.categories.forEach(c=>tiles.push({k:c.label,v:ROLES.filter(r=>r.cat===c.key).length}));
   tiles.push({k:'Marked right fit',v:Object.values(status).filter(v=>v==='fit').length,accent:true});
@@ -397,9 +536,16 @@ function renderControls(){
     <button data-vm="tiles" aria-pressed="${viewMode==='tiles'}" title="Card tiles">▦ Tiles</button>
     <button data-vm="table" aria-pressed="${viewMode==='table'}" title="Compact table">☰ Table</button>
     <button data-vm="excel" aria-pressed="${viewMode==='excel'}" title="Spreadsheet grid">▤ Excel</button></div>`;
-  $('controls').innerHTML = chipHtml + `<span class="spacer"></span>${seg}<input class="search" id="search" type="search" placeholder="Search roles…" value="${query.replace(/"/g,'&quot;')}" />`;
+  const sortOpts = HAS_SCORES
+    ? [['score','Best fit'],['pay','Pay'],['fresh','Freshest'],['az','A–Z']]
+    : [['default','Default'],['pay','Pay'],['fresh','Freshest'],['az','A–Z']];
+  const sortSel = `<select class="sortsel" id="sortsel" title="Sort roles">${sortOpts.map(o=>`<option value="${o[0]}" ${sortBy===o[0]?'selected':''}>Sort: ${o[1]}</option>`).join('')}</select>`;
+  const minSel = HAS_SCORES ? `<select class="sortsel" id="minsel" title="Minimum fit score">${[[0,'Fit: all'],[6,'Fit ≥ 6'],[8,'Fit ≥ 8'],[9,'Fit ≥ 9']].map(o=>`<option value="${o[0]}" ${minScore==o[0]?'selected':''}>${o[1]}</option>`).join('')}</select>` : '';
+  $('controls').innerHTML = chipHtml + `<span class="spacer"></span>${minSel}${sortSel}${seg}<input class="search" id="search" type="search" placeholder="Search roles…" value="${query.replace(/"/g,'&quot;')}" />`;
   document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ filter=b.dataset.filter; renderControls(); renderGrid(); });
   document.querySelectorAll('#viewseg button').forEach(b=>b.onclick=()=>{ viewMode=b.dataset.vm; save(); renderControls(); renderGrid(); });
+  $('sortsel').onchange=e=>{ sortBy=e.target.value; save(); renderGrid(); };
+  if($('minsel')) $('minsel').onchange=e=>{ minScore=+e.target.value; save(); renderGrid(); };
   $('search').oninput=e=>{ query=e.target.value; renderGrid(); };
 }
 
@@ -413,7 +559,7 @@ function card(r){
     <div class="card-head"><div style="flex:1">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span class="cat-tag ${c.cls}">${esc(c.label)}</span>${flags}</div>
       <h3>${esc(r.title)}</h3><div class="company">${esc(r.company)}</div></div>
-      <span class="fresh ${fr.cls}" title="Posting freshness"><span class="fdot"></span>${fr.text}</span></div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">${scoreBadge(r)}<span class="fresh ${fr.cls}" title="Posting freshness"><span class="fdot"></span>${fr.text}</span></div></div>
     <div class="meta">
       <span class="mk">${ICONS.loc}Location</span><span class="mv">${esc(r.loc)}${r.scope?` · <span style="color:var(--warn)">${esc(r.scope)}</span>`:''}</span>
       <span class="mk">${ICONS.time}Schedule</span><span class="mv">${esc(r.schedule)}</span>
@@ -429,17 +575,18 @@ function rowCells(r){
   const roleCell=r.url?`<a href="${r.url}" target="_blank" rel="noopener" class="rrole">${esc(r.title)} ↗</a>`:`<span class="rrole">${esc(r.title)}</span>`;
   const noteMark=notes[r.id]?` <span title="${esc(notes[r.id])}" style="cursor:help">✏️</span>`:'';
   const tag=`<span class="rowacts"><button class="btn btn-fit" data-id="${r.id}" data-act="fit" aria-pressed="${st==='fit'}" title="Right fit">✓</button><button class="btn btn-pass" data-id="${r.id}" data-act="pass" aria-pressed="${st==='pass'}" title="Not for me">✕</button>${noteMark}</span>`;
-  return [`<span class="cat-tag ${c.cls}">${esc(c.short||c.label)}</span>`, roleCell, esc(r.company), esc(r.loc), esc(r.schedule), `<span class="pay">${esc(r.pay)}</span>`, esc(fr.text), esc(r.src), tag];
+  const scoreCell = typeof r.score==='number' ? scoreBadge(r) : '<span style="color:var(--muted)">—</span>';
+  return [scoreCell, `<span class="cat-tag ${c.cls}">${esc(c.short||c.label)}</span>`, roleCell, esc(r.company), esc(r.loc), esc(r.schedule), `<span class="pay">${esc(r.pay)}</span>`, esc(fr.text), esc(r.src), tag];
 }
 function renderTable(list){
-  const heads=['','Category','Role','Company','Location','Schedule','Pay','Posted','Source','Tag'];
+  const heads=['','Fit','Category','Role','Company','Location','Schedule','Pay','Posted','Source','Tag'];
   const body=list.map(r=>{ const st=status[r.id],c=rowCells(r);
-    return `<tr><td><span class="stt ${st||''}"></span></td><td>${c[0]}</td><td class="wrap">${c[1]}</td><td>${c[2]}</td><td>${c[3]}</td><td>${c[4]}</td><td class="pay">${c[5]}</td><td>${c[6]}</td><td>${c[7]}</td><td>${c[8]}</td></tr>`; }).join('');
+    return `<tr><td><span class="stt ${st||''}"></span></td><td>${c[0]}</td><td>${c[1]}</td><td class="wrap">${c[2]}</td><td>${c[3]}</td><td>${c[4]}</td><td>${c[5]}</td><td class="pay">${c[6]}</td><td>${c[7]}</td><td>${c[8]}</td><td>${c[9]}</td></tr>`; }).join('');
   return `<div class="tbl-wrap"><table class="rtable"><thead><tr>${heads.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>`;
 }
 function renderExcel(list){
-  const names=['#','Category','Role','Company','Location','Schedule','Pay','Posted','Source','Tag'];
-  const letters=['','A','B','C','D','E','F','G','H','I'];
+  const names=['#','Fit','Category','Role','Company','Location','Schedule','Pay','Posted','Source','Tag'];
+  const letters=['','A','B','C','D','E','F','G','H','I','J'];
   const body=list.map((r,i)=>`<tr><td class="rownum">${i+1}</td>${rowCells(r).map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
   return `<div class="xl-wrap"><table class="xtable"><thead><tr class="colhead">${letters.map(l=>`<th class="${l===''?'rownum':''}">${l}</th>`).join('')}</tr><tr class="namehead">${names.map((n,i)=>`<th class="${i===0?'rownum':''}">${n}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>`;
 }
@@ -449,9 +596,12 @@ function wireActions(host){
 }
 function renderGrid(){
   const q=query.trim().toLowerCase();
-  const list=ROLES.filter(r=>(filter==='all'||(filter==='verified'?r.verified:r.cat===filter))).filter(r=>!q||(r.title+' '+r.company+' '+r.loc+' '+r.src).toLowerCase().includes(q));
+  let list=ROLES.filter(r=>(filter==='all'||(filter==='verified'?r.verified:r.cat===filter)))
+    .filter(r=>!q||(r.title+' '+r.company+' '+r.loc+' '+r.src).toLowerCase().includes(q))
+    .filter(r=> minScore===0 || (typeof r.score==='number' && r.score>=minScore));
+  list=sortList(list);
   const grid=$('grid'); grid.className=viewMode==='tiles'?'grid':'';
-  if(!list.length){ grid.innerHTML='<div class="empty">No roles match — try clearing the search or filter.</div>'; return; }
+  if(!list.length){ grid.innerHTML='<div class="empty">No roles match — try lowering the fit filter or clearing the search.</div>'; return; }
   grid.innerHTML = viewMode==='table'?renderTable(list):viewMode==='excel'?renderExcel(list):list.map(card).join('');
   wireActions(grid);
 }
@@ -496,7 +646,29 @@ $('pref-include').oninput=e=>{ prefs.include=e.target.value; save(); };
 $('pref-exclude').oninput=e=>{ prefs.exclude=e.target.value; save(); };
 
 /* ============================ TABS + INIT ============================ */
-function switchView(v){ document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.view===v))); ['roles','sources','settings'].forEach(n=>{ $('view-'+n).hidden=n!==v; }); const el=$('view-'+v); el.classList.remove('fade'); void el.offsetWidth; el.classList.add('fade'); }
+/* ============================ OUTREACH + WORD OF MOUTH ============================ */
+function renderOutreach(){
+  const oc=ACTIVE.outreach||[], wom=ACTIVE.wordofmouth||[];
+  if(!oc.length && !wom.length){ if($('tab-outreach')) $('tab-outreach').hidden=true; return; }
+  if($('tab-outreach')) $('tab-outreach').hidden=false;
+  const contactBtns=o=>{
+    const b=[];
+    if(o.url) b.push(`<a class="obtn" href="${o.url}" target="_blank" rel="noopener">Website ↗</a>`);
+    if(o.email) b.push(`<button class="obtn" data-copy-email="${esc(o.email)}">✉ ${esc(o.email)}</button>`);
+    if(o.ig){ const h=o.ig.replace('@',''); b.push(`<a class="obtn" href="https://instagram.com/${esc(h)}" target="_blank" rel="noopener">◎ @${esc(h)}</a>`); }
+    if(o.phone) b.push(`<a class="obtn" href="tel:${esc(o.phone.replace(/[^0-9+]/g,''))}">☎ ${esc(o.phone)}</a>`);
+    return b.join('');
+  };
+  const cards=oc.map(o=>`<div class="oc"><div class="ohead"><div><div class="on">${esc(o.name)}</div><div class="ot">${esc(o.type||'')}</div></div>${o.hiring?'<span class="hiring">Hiring</span>':''}</div><div class="onote">${esc(o.note||'')}</div><div class="orow">${contactBtns(o)}</div></div>`).join('');
+  const womHtml=wom.map(w=>`<a href="${w.url}" target="_blank" rel="noopener"><div class="wn">${esc(w.name)}</div><div class="wp">${esc(w.platform||'')}</div><div class="wnote">${esc(w.note||'')}</div></a>`).join('');
+  $('outreach-body').innerHTML =
+    (oc.length?`<div class="sec-title">Companies to approach directly${oc.some(o=>o.email)?' · emails ready for cold outreach':''}</div><div class="oc-grid">${cards}</div>`:'') +
+    (wom.length?`<div class="sec-title">Word-of-mouth &amp; communities</div><div class="wom">${womHtml}</div>`:'');
+  document.querySelectorAll('[data-copy-email]').forEach(b=>b.onclick=()=>{ const em=b.dataset.copyEmail; navigator.clipboard.writeText(em).then(()=>{ b.textContent='✓ Copied'; setTimeout(()=>{ b.innerHTML='✉ '+esc(em); },1200); }); });
+}
+
+/* ============================ TABS + INIT ============================ */
+function switchView(v){ document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.view===v))); ['roles','sources','outreach','settings'].forEach(n=>{ $('view-'+n).hidden=n!==v; }); const el=$('view-'+v); el.classList.remove('fade'); void el.offsetWidth; el.classList.add('fade'); }
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchView(t.dataset.view));
-renderStats(); renderControls(); renderGrid(); renderSources(); renderSettings();
+renderStats(); renderControls(); renderGrid(); renderSources(); renderOutreach(); renderSettings();
 </script>

@@ -143,8 +143,9 @@
 <script>
   // Published Role Finder engine + Kingsley's bespoke page
   const FINDER_BASE = 'https://claude.ai/code/artifact/9803a126-74e7-498d-89cd-80d35a96ed3a';
-  const KINGSLEY_URL = 'https://claude.ai/code/artifact/11301130-e96e-45b7-b53d-f549d2fefd3a';
-  const STORE = 'rf-admin-friends-v1';
+  const KINGSLEY_URL = FINDER_BASE + '#kingsley';   // Kingsley now runs on the same engine
+  const CARRIE_URL = FINDER_BASE + '#carrie';
+  const STORE = 'rf-admin-friends-v2';
   const $ = id => document.getElementById(id);
   const esc = s => String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
   const enc = obj => btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
@@ -154,7 +155,7 @@
     { id:'kingsley', name:'Kingsley', avatar:'g', seed:true, location:'Austin, TX',
       summary:'Household & family + professional organizing roles.', tags:['Austin','Household','Organizing'], url:KINGSLEY_URL },
     { id:'carrie', name:'Carrie', avatar:'b', seed:true, location:'Austin, TX',
-      summary:'Tech / SaaS sales — Account Executive + SDR/BDR, hybrid (≥2 days in-office).', tags:['Austin','Hybrid','AE','SDR/BDR'], url:FINDER_BASE }
+      summary:'Tech / SaaS sales — Account Executive + SDR/BDR, hybrid (≥2 days in-office).', tags:['Austin','Hybrid','AE','SDR/BDR'], url:CARRIE_URL }
   ];
   let friends;
   try { friends = JSON.parse(localStorage.getItem(STORE)||'null'); } catch(e){ friends=null; }
