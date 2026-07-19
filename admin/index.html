@@ -142,10 +142,10 @@
 
 <script>
   // Published Role Finder engine + Kingsley's bespoke page
-  const FINDER_BASE = 'https://claude.ai/code/artifact/9803a126-74e7-498d-89cd-80d35a96ed3a';
-  const KINGSLEY_URL = FINDER_BASE + '#kingsley';   // Kingsley now runs on the same engine
-  const CARRIE_URL = FINDER_BASE + '#carrie';
-  const STORE = 'rf-admin-friends-v2';
+  const FINDER_BASE = 'https://claude.ai/code/artifact/9803a126-74e7-498d-89cd-80d35a96ed3a';   // Carrie's page (engine default)
+  const CARRIE_URL = FINDER_BASE;
+  const KINGSLEY_URL = 'https://claude.ai/code/artifact/11301130-e96e-45b7-b53d-f549d2fefd3a';  // Kingsley's own dedicated page
+  const STORE = 'rf-admin-friends-v3';
   const $ = id => document.getElementById(id);
   const esc = s => String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
   const enc = obj => btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
@@ -174,12 +174,13 @@
       const tags=(f.tags||[]).map(t=>`<span class="pill">${esc(t)}</span>`).join('');
       return `<div class="fcard">
         <div class="fhead"><div class="avatar ${f.avatar||''}">${esc((f.name||'?').slice(0,1).toUpperCase())}</div>
-          <div><div class="fn">${esc(f.name)}</div>${f.seed?'<div class="seed">Verified hub</div>':'<div class="seed" style="color:var(--accent)">Starter page</div>'}</div></div>
+          <div><div class="fn">${esc(f.name)}</div>${f.seed?'<div class="seed">Verified hub</div>':'<div class="seed" style="color:var(--accent)">Brief ready</div>'}</div></div>
         <div class="fsum">${esc(f.summary||'')}</div>
         <div class="fmeta">${tags}</div>
         <div class="factions">
-          <a class="btn btn-sm btn-primary" href="${f.url}" target="_blank" rel="noopener">Open Role Finder ↗</a>
-          <button class="btn btn-sm" data-copy="${f.id}">Copy link</button>
+          ${f.seed
+            ? `<a class="btn btn-sm btn-primary" href="${f.url}" target="_blank" rel="noopener">Open Role Finder ↗</a><button class="btn btn-sm" data-copy="${f.id}">Copy link</button>`
+            : `<button class="btn btn-sm btn-primary" data-brief="${f.id}">Copy brief for Claude</button><a class="btn btn-sm" href="${f.url}" target="_blank" rel="noopener" title="Renders only when opened directly, not on claude.ai">Preview ↗</a>`}
           <span class="grow"></span>
           ${f.seed?'':`<button class="btn-rm" data-rm="${f.id}">Remove</button>`}
         </div></div>`;
@@ -187,6 +188,7 @@
     $('friends').innerHTML = cards + `<div class="fcard add" id="add-card"><div class="plus">＋</div><div>Add a friend</div></div>`;
     $('add-card').onclick = openChat;
     document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{ const f=friends.find(x=>x.id===b.dataset.copy); navigator.clipboard.writeText(f.url).then(()=>toast('Link copied — send it to '+f.name)); });
+    document.querySelectorAll('[data-brief]').forEach(b=>b.onclick=()=>{ const f=friends.find(x=>x.id===b.dataset.brief); navigator.clipboard.writeText(f.briefText||f.summary).then(()=>toast('Brief copied — paste it to Claude to publish '+f.name)); });
     document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ friends=friends.filter(x=>x.id!==b.dataset.rm); persist(); renderStats(); renderFriends(); });
   }
 
@@ -233,12 +235,13 @@
     const url = finderLink(brief);
     const id = (draft.name||'friend').toLowerCase().replace(/[^a-z0-9]+/g,'-') + '-' + Math.abs(hash(url)).toString(36).slice(0,4);
     const tags=[draft.location, modeTxt, draft.level].filter(Boolean);
-    const friend={ id, name:draft.name, avatar:'', location:draft.location, summary:(draft.titles||[]).join(', ')+(draft.level?` · ${draft.level}`:''), tags, url };
+    const briefText = `Please publish a hosted Role Finder page for ${draft.name}:\n• Roles: ${(draft.titles||[]).join(', ')||'-'}\n• Location: ${draft.location||'-'} (${modeTxt||'any mode'})\n• Level: ${draft.level||'-'}\n• Pay target: ${draft.pay||'-'}\n• Avoid: ${draft.avoid||'-'}`;
+    const friend={ id, name:draft.name, avatar:'', location:draft.location, summary:(draft.titles||[]).join(', ')+(draft.level?` · ${draft.level}`:''), tags, url, brief, briefText };
     friends.push(friend); persist(); renderStats(); renderFriends();
     const b=botSay('','done');
-    b.innerHTML = `<strong>✓ ${esc(draft.name)}'s Role Finder is ready.</strong><br>Their target roles link to live ${esc(draft.location||'')} searches now — I'll add hand-verified postings over time.<span class="lnk">${esc(url)}</span><div class="dbtns"><a class="btn btn-sm btn-primary" href="${url}" target="_blank" rel="noopener">Open it ↗</a><button class="btn btn-sm" id="d-copy">Copy link</button><button class="btn btn-sm" id="d-again">Add another</button></div>`;
+    b.innerHTML = `<strong>✓ Brief captured for ${esc(draft.name)}.</strong><br>To get a <strong>shareable hosted page</strong> like Kingsley's or Carrie's, copy the brief and paste it to Claude in chat — I'll research live roles and publish ${esc(draft.name)} their own page. <span style="color:var(--muted)">(The preview link only renders when the file is opened directly, not on claude.ai.)</span><div class="dbtns"><button class="btn btn-sm btn-primary" id="d-brief">Copy brief for Claude</button><a class="btn btn-sm" href="${url}" target="_blank" rel="noopener" title="Renders only when opened directly, not on claude.ai">Preview ↗</a><button class="btn btn-sm" id="d-again">Add another</button></div>`;
     $('chat-quick').innerHTML=''; $('chat-field').placeholder='Done — add another or close';
-    $('d-copy').onclick=()=>navigator.clipboard.writeText(url).then(()=>toast('Link copied — send it to '+draft.name));
+    $('d-brief').onclick=()=>navigator.clipboard.writeText(briefText).then(()=>toast('Brief copied — paste it to Claude'));
     $('d-again').onclick=openChat;
   }
   function hash(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h<<5)-h+s.charCodeAt(i); h|=0; } return h; }
